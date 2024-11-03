@@ -1,0 +1,14 @@
+.background {
+  background-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.7)
+    ),
+    url("../assets//library.jpg");
+
+  /* color: rgb(214, 214, 212); */
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  background-attachment: fixed;
+}
