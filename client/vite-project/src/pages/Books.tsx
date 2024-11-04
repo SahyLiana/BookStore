@@ -49,7 +49,17 @@ function Books() {
           }}
           className="flex"
         >
-          <form className="border-[1px] flex  border-slate-600 rounded-lg mr-2">
+          <motion.form
+            initial="hidden"
+            viewport={{ once: true }}
+            whileInView="visible"
+            transition={{ duration: 1 }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1 },
+            }}
+            className="border-[1px] flex  border-slate-600 rounded-lg mr-2"
+          >
             <input
               type="text"
               placeholder="Search a book..."
@@ -58,7 +68,7 @@ function Books() {
             <button className=" bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-r-lg h-full">
               <SearchIcon />
             </button>
-          </form>
+          </motion.form>
           <button className="bg-green-700 px-2 tex-md font-semibold rounded-lg hover:bg-green-800 duration-200">
             Create book
           </button>

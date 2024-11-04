@@ -5,7 +5,7 @@ type BookType = {
   img: string;
   featured: boolean;
   likedBy?: string[];
-  borrowedBy: string[];
+  borrowedBy: { by: string; returnedBy?: string }[];
   quantity: number;
 };
 
@@ -32,7 +32,7 @@ const booksValue = [
     img: "http://localhost:3000/uploads/avenger.jpeg",
     featured: false,
     likedBy: ["1id", "2id", "3id"],
-    borrowedBy: ["myId"],
+    borrowedBy: [{ by: "myId", returnedBy: "2024-12-12" }],
     quantity: 2,
   },
   {
@@ -40,7 +40,7 @@ const booksValue = [
     img: "http://localhost:3000/uploads/captain.png",
     featured: true,
     likedBy: ["1id", "2id", "3id", "4id", "5id"],
-    borrowedBy: ["myId"],
+    borrowedBy: [{ by: "myId", returnedBy: "2024-11-12" }],
     quantity: 1,
   },
   {
@@ -48,7 +48,7 @@ const booksValue = [
     img: "http://localhost:3000/uploads/js.jpg",
     featured: false,
     likedBy: ["1id", "2id"],
-    borrowedBy: ["1id", "2id"],
+    borrowedBy: [{ by: "1id" }, { by: "2id" }],
     quantity: 2,
   },
   {
@@ -64,7 +64,7 @@ const booksValue = [
     img: "http://localhost:3000/uploads/mern.jpg",
     featured: false,
     likedBy: ["1id", "2id", "3id"],
-    borrowedBy: ["myId"],
+    borrowedBy: [{ by: "myId" }],
     quantity: 2,
   },
   {
@@ -72,7 +72,7 @@ const booksValue = [
     img: "http://localhost:3000/uploads/reactbook.jpg",
     featured: false,
     likedBy: ["1id", "2id", "3id"],
-    borrowedBy: ["1id"],
+    borrowedBy: [{ by: "1id" }],
     quantity: 1,
   },
 ];
@@ -152,9 +152,9 @@ const bookStore = create<State & Actions>((set) => ({
     });
   },
 
-  borrowBookFunction: (bookTitle, userId) => {
+  borrowBookFunction: (bookTitle, userEmail) => {
     console.log("BorrowBookFunction store");
-    console.log("The book borrowed is " + bookTitle + " by " + userId);
+    console.log("The book borrowed is " + bookTitle + " by " + userEmail);
 
     set((state) => {
       const findBookTitle = state.books.find(
@@ -168,7 +168,10 @@ const bookStore = create<State & Actions>((set) => ({
             ...state,
             books: state.books.map((book) =>
               book.title === bookTitle
-                ? { ...book, borrowedBy: [...book.borrowedBy, userId] }
+                ? {
+                    ...book,
+                    borrowedBy: [...book.borrowedBy, { by: userEmail }],
+                  }
                 : book
             ),
           };

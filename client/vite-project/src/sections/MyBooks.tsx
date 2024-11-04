@@ -9,7 +9,7 @@ type BooksType = {
   title: string;
   img: string;
   featured: boolean;
-  borrowedBy: string[];
+  borrowedBy?: { by: string; returnedBy?: string }[];
   quantity: number;
 };
 
@@ -55,10 +55,18 @@ function MyBooks() {
 
   useEffect(() => {
     if (viewAll) {
-      setBooksView(books.filter((book) => book.borrowedBy.includes("myId")));
+      setBooksView(
+        books.filter((book) =>
+          book.borrowedBy.find((borrow) => borrow.by === "myId")
+        )
+      );
     } else {
       setBooksView(
-        books.filter((book) => book.borrowedBy.includes("myId")).slice(0, 4)
+        books
+          .filter((book) =>
+            book.borrowedBy.find((borrow) => borrow.by === "myId")
+          )
+          .slice(0, 4)
       );
     }
     setIsEmptyBook(false);

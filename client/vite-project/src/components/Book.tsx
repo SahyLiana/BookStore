@@ -12,7 +12,7 @@ type Props = {
     img: string;
     featured: boolean;
     likedBy?: string[];
-    borrowedBy?: string[];
+    borrowedBy?: { by: string; returnedBy?: string }[];
     quantity: number;
   };
 };
@@ -52,14 +52,14 @@ function Book({ book }: Props) {
     quantity: number,
     e: React.FormEvent<HTMLFormElement>,
     userId = "myId",
-    borrowedBy?: string[]
+    borrowedBy?: { by: string; returnedBy?: string }[]
   ) => {
     e.stopPropagation();
     console.log("BorrowedByLength", borrowedBy?.length);
     if (
       borrowedBy &&
       borrowedBy.length < quantity &&
-      !borrowedBy?.includes("myId")
+      !borrowedBy?.find((borrow) => borrow.by === "myId")
     ) {
       borrowBookFunction(bookTitle, userId);
     } else {
@@ -105,7 +105,7 @@ function Book({ book }: Props) {
             </p>
           )}
 
-          {book.borrowedBy?.includes("myId") && (
+          {book.borrowedBy?.find((borrow) => borrow.by === "myId") && (
             <p className="absolute p-1 text-sm top-0 rounded-tl-xl left-0 bg-green-700 text-white">
               You have borrowed
             </p>
@@ -122,7 +122,9 @@ function Book({ book }: Props) {
           <div className="">
             {book.borrowedBy &&
               book.borrowedBy.length < book.quantity &&
-              !book.borrowedBy?.includes("myId") && (
+              !book.borrowedBy?.find(
+                (borrow) => borrow.returnedBy === "myId"
+              ) && (
                 <AddCircleOutlineIcon
                   onClick={(e: any) =>
                     handleBorrow(
@@ -169,7 +171,7 @@ function Book({ book }: Props) {
               </p>
             )}
 
-            {book.borrowedBy?.includes("myId") && (
+            {book.borrowedBy?.find((borrow) => borrow.by === "myId") && (
               <p className="absolute p-1 text-sm top-0 rounded-tl-xl left-0 bg-green-700 text-white">
                 You have borrowed
               </p>
@@ -185,7 +187,7 @@ function Book({ book }: Props) {
             </p>
             {book.borrowedBy &&
               book.borrowedBy.length < book.quantity &&
-              !book.borrowedBy?.includes("myId") && (
+              book.borrowedBy?.find((borrow) => borrow.by === "myId") && (
                 <AddCircleOutlineIcon
                   onClick={(e: any) =>
                     handleBorrow(

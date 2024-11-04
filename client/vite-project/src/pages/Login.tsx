@@ -40,7 +40,7 @@ function Login() {
 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-yellow-300">
-      <div className="w-2/3 bg-white h-1/2 overflow-hidden flex rounded-xl shadow-2xl">
+      <div className="w-2/3 bg-white h-1/2 overflow-hidden flex rounded-xl items-center shadow-2xl overflow-y-auto">
         <div className="w-1/2 h-full   justify-center flex items-center ">
           <motion.img
             src={Wbook}
@@ -61,7 +61,7 @@ function Login() {
             hidden: { opacity: 0 },
             visible: { opacity: 1 },
           }}
-          className="w-1/2 p-10 bg-slate-50"
+          className="w-1/2 px-10 bg-slate-50"
         >
           <h1 className="text-center text-5xl text-yellow-800 font-bold">
             Admin Login

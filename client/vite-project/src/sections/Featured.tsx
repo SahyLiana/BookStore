@@ -9,7 +9,7 @@ type BooksType = {
   title: string;
   img: string;
   featured: boolean;
-  borrowedBy: string[];
+  borrowedBy?: { by: string; returnedBy?: string }[];
   quantity: number;
 };
 
