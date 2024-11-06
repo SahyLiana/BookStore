@@ -21,24 +21,28 @@ export class StudentController {
   constructor(private studentService: StudentService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   getAllStudents() {
     return this.studentService.getAllStudentService();
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
   registerStudent(@Body() studentData: StudentDto) {
     return this.studentService.registerStudentService(studentData);
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   getSingleStudent(@Param('id') studentId: string) {
     return this.studentService.getSingleStudentService(studentId);
   }
 
-  @Delete(':id')
-  deleteStudent(@Param('id') studentId: string) {
-    return this.studentService.deleteUserService(studentId);
+  @Delete(':email')
+  @UseGuards(JwtAuthGuard)
+  deleteStudent(@Param('email') student: string) {
+    return this.studentService.deleteUserService(student);
   }
 
   @Post('login')

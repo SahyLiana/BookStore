@@ -8,9 +8,12 @@ import { promises as fs } from 'fs';
 
 @Injectable()
 export class BookService {
-  private uploadDir = join(
-    '/home/sahy/Tutorials/react/BookStore/server/book-server/uploads/',
-  );
+  // projectRoot = path.resolve(__dirname, '..');
+  // private uploadDir = join(path.resolve(__dirname, '..'), 'uploads');
+
+  private uploadDir = join('C:/Tutorials/react/BookStore/book-server/uploads/');
+
+  // private uploadDir = join(__dirname, '..', 'uploads');
 
   constructor(@InjectModel(Book.name) private bookModel: Model<Book>) {}
 
@@ -138,5 +141,63 @@ export class BookService {
     } catch (e) {
       throw new HttpException('Invalid input', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async likeBookService(bookId: string, body: any) {
+    console.log('Inside likebookservice:', bookId, body);
+
+    const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
+    if (!isValidBookId) {
+      throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
+    }
+
+    const updateBook = this.bookModel.findByIdAndUpdate(
+      { _id: bookId },
+      { $push: { likedBy: body.user } },
+      { new: true },
+    );
+
+    return updateBook;
+  }
+
+  async borrowBookService(
+    bookId: string,
+    body: { user: string; returnedBy?: string },
+  ) {
+    const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
+    if (!isValidBookId) {
+      throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
+    }
+
+    console.log('Inside likebookservice:', bookId, body);
+
+    const borrowBook = this.bookModel.findByIdAndUpdate(
+      { _id: bookId },
+      { $push: { borrowedBy: { ...body } } },
+      { new: true },
+
+      // { $push: { likedBy: body.user } },
+    );
+
+    return borrowBook;
+  }
+
+  async returnBookService(bookId: string, body: { user: string }) {
+    const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
+    if (!isValidBookId) {
+      throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
+    }
+
+    console.log('Inside likebookservice:', bookId, body);
+
+    const returnBook = this.bookModel.findByIdAndUpdate(
+      { _id: bookId },
+      { $pull: { borrowedBy: { user: body.user } } },
+      { new: true },
+
+      // { $push: { likedBy: body.user } },
+    );
+
+    return returnBook;
   }
 }

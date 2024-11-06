@@ -6,6 +6,7 @@ import { Student, StudentSchema } from 'src/schema/student.schema';
 import { Book, BookSchema } from 'src/schema/book.schema';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from 'src/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { JwtModule } from '@nestjs/jwt';
     ]),
   ],
   controllers: [StudentController],
-  providers: [StudentService],
+  providers: [StudentService, JwtStrategy],
 })
 export class StudentModule {}

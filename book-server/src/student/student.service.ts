@@ -57,26 +57,36 @@ export class StudentService {
     }
   }
 
-  async deleteUserService(studentId: string) {
-    console.log('Delete user service', studentId);
+  async deleteUserService(student: string) {
+    console.log('Delete user service', student);
 
-    const isValidId = mongoose.Types.ObjectId.isValid(studentId);
+    // const isValidId = mongoose.Types.ObjectId.isValid(student);
 
-    if (!isValidId) {
-      throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
-    }
+    // if (!isValidId) {
+    //   throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
+    // }
 
     try {
-      const deleteStudent = await this.studentModel.findByIdAndDelete({
-        _id: studentId,
+      const deleteStudent = await this.studentModel.findOneAndDelete({
+        email: student,
       });
 
       if (!deleteStudent) {
         throw new HttpException('Student not found', HttpStatus.NOT_FOUND);
       }
+
       await this.bookModel.updateMany(
-        { borrowedBy: { $in: [studentId] } },
-        { $pull: { borrowedBy: studentId, likedBy: studentId } },
+        { likedBy: { $in: [student] } },
+        { $pull: { likedBy: student } },
+        // { borrowedBy: { $in: [studentId] } },
+        // { $pull: { borrowedBy: studentId, likedBy: studentId } },
+      );
+
+      await this.bookModel.updateMany(
+        { 'borrowedBy.user': { $in: [student] } },
+        { $pull: { borrowedBy: { user: student } } },
+        // { borrowedBy: { $in: [studentId] } },
+        // { $pull: { borrowedBy: studentId, likedBy: studentId } },
       );
       return deleteStudent;
     } catch (e) {
@@ -115,9 +125,18 @@ export class StudentService {
   //THIS TEST IS USED HOW TO REMOVE THE USER FROM THE BORROWEDBY AND LIKEDBY ARRAY FIELD IN ALL BOOKS
   async testGetBooks(studentId: string) {
     console.log(studentId);
+    // return await this.bookModel.updateMany(
+    //   { borrowedBy: { $in: { user: [studentId] } } },
+    //   { $pull: { borrowedBy: { user: studentId }, likedBy: studentId } },
+    // );
+
     return await this.bookModel.updateMany(
-      { borrowedBy: { $in: [studentId] } },
-      { $pull: { borrowedBy: studentId, likedBy: studentId } },
+      // { borrowedBy: { $in: [{ user: [studentId] }] } },
+      { 'borrowedBy.user': { $in: [studentId] } },
+      //OR   { 'borrowedBy.user': studentId },
+      { $pull: { borrowedBy: { user: studentId } } },
+      // { borrowedBy: { $in: [studentId] } },
+      // { $pull: { borrowedBy: studentId, likedBy: studentId } },
     );
     // return await this.bookModel.find({ borrowedBy: { $in: [studentId] } });
   }

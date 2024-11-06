@@ -6,6 +6,7 @@ import OpenBook from "@mui/icons-material/AddHomeWork";
 import Student from "@mui/icons-material/Person";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import "./adminNavShadow.css";
 
 function AdminNav() {
   // const [link, setLink] = useState("home");
@@ -35,7 +36,7 @@ function AdminNav() {
         hidden: { opacity: 0, y: 10 },
         visible: { opacity: 1, y: 0 },
       }}
-      className="h-[70%] relative bg-slate-900 flex flex-col gap-3 my-auto border-[1px]  rounded-xl border-yellow-200 border-opacity-25 shadow-md shadow-yellow-200 py-5 w-[90%]  px-4 mx-auto"
+      className="h-[70%] relative bg-slate-900 flex flex-col gap-3 my-auto border-[1px]  rounded-xl border-yellow-200 border-opacity-25 shadowNav py-5 w-[90%]  px-4 mx-auto"
     >
       <h1 className="font-semibold text-blue-800 text-3xl">LIBRARIA</h1>
       <div className="mb-5 h-[1px] bg-blue-800 w-full"></div>

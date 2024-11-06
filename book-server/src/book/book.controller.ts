@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -18,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { extname } from 'path';
 import { diskStorage } from 'multer';
 import { CreateBook } from 'src/dto/createbook.dto';
+import { JwtAuthGuard } from 'src/guards/jwt.guards';
 
 @Controller('api/book')
 export class BookController {
@@ -29,6 +31,7 @@ export class BookController {
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
   @UseInterceptors(
     FileInterceptor('bookImg', {
@@ -60,11 +63,13 @@ export class BookController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   deleteBook(@Param('id') bookId: string) {
     return this.bookService.deleteBookService(bookId);
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('bookImg', {
       storage: diskStorage({
@@ -96,5 +101,26 @@ export class BookController {
     @Body() bookEdit: { title: string; featured: boolean; img: string },
   ) {
     return this.bookService.updateBookService(bookId, file, bookEdit);
+  }
+
+  @Patch('like/:bookId')
+  @UseGuards(JwtAuthGuard)
+  likeBook(@Param('bookId') bookId: string, @Body() body: string) {
+    return this.bookService.likeBookService(bookId, body);
+  }
+
+  @Patch('borrow/:bookId')
+  @UseGuards(JwtAuthGuard)
+  borrowBook(
+    @Param('bookId') bookId: string,
+    @Body() body: { user: string; returnedBy?: string },
+  ) {
+    return this.bookService.borrowBookService(bookId, body);
+  }
+
+  @Patch('return/:bookId')
+  @UseGuards(JwtAuthGuard)
+  returnBook(@Param('bookId') bookId: string, @Body() body: { user: string }) {
+    return this.bookService.returnBookService(bookId, body);
   }
 }
