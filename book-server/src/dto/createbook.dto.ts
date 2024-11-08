@@ -6,5 +6,9 @@ export class CreateBook {
   @MinLength(3)
   title: string;
 
+  @IsString()
+  @IsNotEmpty()
+  quantity: string;
+
   featured?: boolean;
 }

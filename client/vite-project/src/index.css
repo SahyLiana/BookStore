@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/** THIS WILL REMOVE THE HORIZONTAL SCROLL*/
+body::-webkit-scrollbar:horizontal {
+  display: none;
+}
+
 html {
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
@@ -27,4 +32,5 @@ html {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2;
 }

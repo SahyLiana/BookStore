@@ -98,7 +98,13 @@ export class BookController {
   updateBook(
     @UploadedFile() file,
     @Param('id') bookId: string,
-    @Body() bookEdit: { title: string; featured: boolean; img: string },
+    @Body()
+    bookEdit: {
+      title: string;
+      featured: boolean;
+      quantity: string;
+      img: string;
+    },
   ) {
     return this.bookService.updateBookService(bookId, file, bookEdit);
   }

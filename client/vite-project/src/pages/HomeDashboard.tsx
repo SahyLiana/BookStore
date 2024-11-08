@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import CardHome from "../components/CardHome";
 import SearchIcon from "@mui/icons-material/Search";
 import { motion } from "framer-motion";
+import bookStore from "../store/BookStore";
 
 function HomeDashboard() {
   const [loading, setLoading] = useState(true);
+  const { books } = bookStore();
 
   useEffect(() => {
     setLoading(false);
@@ -18,17 +20,18 @@ function HomeDashboard() {
 
     {
       title: "Books",
-      total: 12,
+      total: books.reduce((accumulator, book) => {
+        return accumulator + book.quantity;
+      }, 0),
     },
 
     {
       title: "Borrowed Books",
       total: 2,
     },
-
     {
       title: "Remaining Books",
-      total: 10,
+      total: 21,
     },
   ];
 

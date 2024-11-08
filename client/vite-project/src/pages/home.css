@@ -12,3 +12,8 @@
 
   background-attachment: fixed;
 }
+
+.stick {
+  position: sticky;
+  top: 0;
+}

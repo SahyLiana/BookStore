@@ -3,11 +3,25 @@ import AdminNav from "../components/AdminNav";
 // import HomeDashboard from "../components/HomeDashboard";
 import userStore from "../store/UserStore";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
+import bookStore from "../store/BookStore";
 
 function Dashboard() {
   const { admin } = userStore();
+  const { getAllBookStore } = bookStore();
 
   console.log(admin);
+
+  useEffect(() => {
+    const getBookFromStore = async () => {
+      try {
+        await getAllBookStore();
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getBookFromStore();
+  }, []);
 
   return (
     <div className="bg-zinc-950 flex text-slate-100 h-screen overflow-y-auto ">

@@ -8,10 +8,12 @@ import { useState } from "react";
 
 type Props = {
   activeSection: string;
+  sticky: boolean;
 };
 
 Modal.setAppElement("#root");
-function Navbar({ activeSection }: Props) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function Navbar({ activeSection, sticky }: Props) {
   const links = ["Home", "Categories", "Books", "My Books", "Featured"];
 
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
@@ -31,9 +33,11 @@ function Navbar({ activeSection }: Props) {
     setIsOpenLoginModal(false);
     setIsOpenRegisterModal(false);
   }
-
+  // ` ${sticky ? "fixed" : ""}
   return (
-    <div className="flex items-center  max-h-[120px] z-50 justify-between fixed top-0 bg-black bg-opacity-90 text-white w-full border-b-[0.01rem] py-4 px-3 border-slate-400">
+    <div
+      className={`w-full top-0 bg-slate-900 flex items-center   max-h-[120px] z-50 justify-between   bg-opacity-90 text-white  border-b-[0.01rem] py-4 px-3 border-slate-400`}
+    >
       {/** LOGO LEFT */}
       <motion.div
         initial="hidden"

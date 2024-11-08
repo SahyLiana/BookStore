@@ -27,7 +27,11 @@ export class BookService {
 
   async createBookService(book: CreateBook, file) {
     console.log('Create book service');
-    const newBook = new this.bookModel({ ...book, img: file.filename });
+    const newBook = new this.bookModel({
+      ...book,
+      quantity: parseInt(book.quantity, 10),
+      img: file.filename,
+    });
     try {
       return await newBook.save();
     } catch (err) {
@@ -92,7 +96,12 @@ export class BookService {
   async updateBookService(
     bookId: string,
     file,
-    bookEdit: { title: string; featured: boolean; img: string },
+    bookEdit: {
+      title: string;
+      featured: boolean;
+      quantity: string;
+      img: string;
+    },
   ) {
     console.log('Inside book service', bookId);
     const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
@@ -107,9 +116,16 @@ export class BookService {
     try {
       if (!file) {
         // if (bookEdit.title && bookEdit.featured) {
+
         const updateBookMdb = await this.bookModel.findOneAndUpdate(
           { _id: bookId },
-          { $set: { ...bookEdit } },
+          {
+            $set: {
+              title: bookEdit?.title,
+              featured: bookEdit?.featured,
+              quantity: Number(bookEdit?.quantity),
+            },
+          },
           { new: true },
         );
 
@@ -118,7 +134,15 @@ export class BookService {
       } else {
         const updateBookMdb = await this.bookModel.findByIdAndUpdate(
           { _id: bookId },
-          { $set: { ...bookEdit, img: file.filename } },
+          // { $set: { ...bookEdit, img: file.filename } },
+          {
+            $set: {
+              title: bookEdit?.title,
+              featured: bookEdit?.featured,
+              quantity: Number(bookEdit?.quantity),
+              img: file.filname,
+            },
+          },
           { new: true },
         );
 

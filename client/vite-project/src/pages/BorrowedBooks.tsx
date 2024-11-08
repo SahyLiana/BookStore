@@ -5,11 +5,12 @@ import BookAdmin from "../components/BookAdmin";
 import { useEffect, useState } from "react";
 
 type BookType = {
+  _id: string;
   title: string;
   img: string;
   featured: boolean;
   likedBy?: string[];
-  borrowedBy?: string[];
+  borrowedBy?: { by: string; returnedBy?: string }[];
   quantity: number;
 };
 

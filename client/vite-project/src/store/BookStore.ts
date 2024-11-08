@@ -1,11 +1,19 @@
+import axios from "axios";
 import { create } from "zustand";
 
 type BookType = {
+  _id: string;
   title: string;
   img: string;
   featured: boolean;
   likedBy?: string[];
   borrowedBy: { by: string; returnedBy?: string }[];
+  quantity: number;
+};
+
+type createBookType = {
+  title: string;
+  featured: boolean;
   quantity: number;
 };
 
@@ -16,70 +24,78 @@ type State = {
 type Actions = {
   likedFunction: (bookTitle: string, userId: string) => void;
   borrowBookFunction: (bookTitle: string, userId: string) => void;
+  createBookStore: (
+    createBook: createBookType,
+    bookImg: File | undefined,
+    token: string | null
+  ) => void;
+  getAllBookStore: () => void;
+  deleteBookStore: (bookId: string, token: string | null) => void;
 };
 
-const booksValue = [
-  {
-    title: "Antman Quanumania",
-    img: "http://localhost:3000/uploads/antman.jpg",
-    featured: true,
-    likedBy: ["1id", "2id", "3id", "4id"],
-    borrowedBy: [],
-    quantity: 3,
-  },
-  {
-    title: "Avenger Infinity War",
-    img: "http://localhost:3000/uploads/avenger.jpeg",
-    featured: false,
-    likedBy: ["1id", "2id", "3id"],
-    borrowedBy: [{ by: "myId", returnedBy: "2024-12-12" }],
-    quantity: 2,
-  },
-  {
-    title: "Captain America",
-    img: "http://localhost:3000/uploads/captain.png",
-    featured: true,
-    likedBy: ["1id", "2id", "3id", "4id", "5id"],
-    borrowedBy: [{ by: "myId", returnedBy: "2024-11-12" }],
-    quantity: 1,
-  },
-  {
-    title: "Learn Javascript",
-    img: "http://localhost:3000/uploads/js.jpg",
-    featured: false,
-    likedBy: ["1id", "2id"],
-    borrowedBy: [{ by: "1id" }, { by: "2id" }],
-    quantity: 2,
-  },
-  {
-    title: "Medecine M2",
-    img: "http://localhost:3000/uploads/medicine.jpg",
-    featured: true,
-    likedBy: ["1id"],
-    borrowedBy: [],
-    quantity: 4,
-  },
-  {
-    title: "Learn MERN",
-    img: "http://localhost:3000/uploads/mern.jpg",
-    featured: false,
-    likedBy: ["1id", "2id", "3id"],
-    borrowedBy: [{ by: "myId" }],
-    quantity: 2,
-  },
-  {
-    title: "Learn React like a pro",
-    img: "http://localhost:3000/uploads/reactbook.jpg",
-    featured: false,
-    likedBy: ["1id", "2id", "3id"],
-    borrowedBy: [{ by: "1id" }],
-    quantity: 1,
-  },
-];
+// const booksValue = [
+//   {
+//     title: "Antman Quanumania",
+//     bookImg: "http://localhost:3000/uploads/antman.jpg",
+//     featured: true,
+//     likedBy: ["1id", "2id", "3id", "4id"],
+//     borrowedBy: [],
+//     quantity: 3,
+//   },
+//   {
+//     title: "Avenger Infinity War",
+//     bookImg: "http://localhost:3000/uploads/avenger.jpeg",
+//     featured: false,
+//     likedBy: ["1id", "2id", "3id"],
+//     borrowedBy: [{ by: "myId", returnedBy: "2024-12-12" }],
+//     quantity: 2,
+//   },
+//   {
+//     title: "Captain America",
+//     bookImg: "http://localhost:3000/uploads/captain.png",
+//     featured: true,
+//     likedBy: ["1id", "2id", "3id", "4id", "5id"],
+//     borrowedBy: [{ by: "myId", returnedBy: "2024-11-12" }],
+//     quantity: 1,
+//   },
+//   {
+//     title: "Learn Javascript",
+//     bookImg: "http://localhost:3000/uploads/js.jpg",
+//     featured: false,
+//     likedBy: ["1id", "2id"],
+//     borrowedBy: [{ by: "1id" }, { by: "2id" }],
+//     quantity: 2,
+//   },
+//   {
+//     title: "Medecine M2",
+//     bookImg: "http://localhost:3000/uploads/medicine.jpg",
+//     featured: true,
+//     likedBy: ["1id"],
+//     borrowedBy: [],
+//     quantity: 4,
+//   },
+//   {
+//     title: "Learn MERN",
+//     bookImg: "http://localhost:3000/uploads/mern.jpg",
+//     featured: false,
+//     likedBy: ["1id", "2id", "3id"],
+//     borrowedBy: [{ by: "myId" }],
+//     quantity: 2,
+//   },
+//   {
+//     title: "Learn React like a pro",
+//     bookImg: "http://localhost:3000/uploads/reactbook.jpg",
+//     featured: false,
+//     likedBy: ["1id", "2id", "3id"],
+//     borrowedBy: [{ by: "1id" }],
+//     quantity: 1,
+//   },
+// ];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const bookStore = create<State & Actions>((set) => ({
-  books: [...booksValue],
+  // books: [...booksValue],
+  books: [],
 
   likedFunction: (bookTitle, userId) => {
     console.log(userId);
@@ -182,6 +198,61 @@ const bookStore = create<State & Actions>((set) => ({
         return { ...state };
       }
     });
+  },
+
+  createBookStore: async (
+    createBook: createBookType,
+    bookImg: File | undefined,
+    token: string | null
+  ) => {
+    console.log("Inside createbookStore");
+    const formData = new FormData();
+
+    if (bookImg && createBook && token) {
+      formData.append("title", createBook.title);
+      formData.append("featured", String(createBook.featured));
+      formData.append("bookImg", bookImg);
+      formData.append("quantity", createBook.quantity.toString());
+
+      const createdBook = await axios.post(
+        "http://localhost:3000/api/book",
+        formData,
+        { headers: { Authorization: token } }
+      );
+
+      console.log("The created Book is", createdBook);
+
+      set((state) => ({
+        ...state,
+        books: [
+          ...state.books,
+          {
+            ...createdBook.data,
+            img: `${createdBook.data.img}`,
+          },
+        ],
+      }));
+    }
+  },
+
+  getAllBookStore: async () => {
+    const getBookCall = await axios.get("http://localhost:3000/api/book");
+
+    set((state) => ({
+      ...state,
+      books: [...getBookCall.data],
+    }));
+  },
+
+  deleteBookStore: async (bookId: string, token: string | null) => {
+    await axios.delete(`http://localhost:3000/api/book/${bookId}`, {
+      headers: { Authorization: token },
+    });
+
+    set((state) => ({
+      ...state,
+      books: state.books.filter((book) => book._id !== bookId),
+    }));
   },
 }));
 

@@ -8,6 +8,7 @@ import Modal from "react-modal";
 
 type Props = {
   book: {
+    _id: string;
     title: string;
     img: string;
     featured: boolean;
@@ -74,7 +75,12 @@ function Book({ book }: Props) {
   function closeModalBook() {
     // console.log("Closed");
     setIsOpenSingleBookModal(false);
-    setSingleBookModal({ title: "", img: "", featured: false, likedBy: [] });
+    setSingleBookModal({
+      title: "",
+      img: "",
+      featured: false,
+      likedBy: [],
+    });
   }
 
   // const handleClickSingleBooks = (book: BookType) => {
@@ -95,7 +101,7 @@ function Book({ book }: Props) {
         {/**IMAGE CONTAINER */}
         <div className="h-72 rounded-t-xl relative bg-slate-100 py-5 flex justify-center items-center">
           <img
-            src={book.img}
+            src={`http://localhost:3000/uploads/${book.img}`}
             alt=""
             className="w-[60%]  mx-auto group-hover:scale-110 duration-500 transition-all h-[90%]  object-center"
           />
@@ -163,7 +169,10 @@ function Book({ book }: Props) {
         <div className="w-2/3 mx-auto h-full">
           {/**IMG CONTAINER */}
           <div className=" mx-auto relative bg-slate-100 py-4 flex min-h-[43%]">
-            <img src={singleBookModal.img} className="w-1/2 mx-auto " />
+            <img
+              src={`http://localhost:3000/uploads/${singleBookModal.img}`}
+              className="w-1/2 mx-auto "
+            />
 
             {book.borrowedBy?.length === book.quantity && (
               <p className="absolute p-1 text-sm top-0 rounded-tr-xl right-0 bg-red-700 text-white">

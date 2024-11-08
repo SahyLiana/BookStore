@@ -8,6 +8,9 @@ export class Book {
   @Prop({ required: true })
   img: string;
 
+  @Prop({ required: true })
+  quantity: number;
+
   @Prop({ required: false, default: [] })
   likedBy: string[];
 
