@@ -111,7 +111,7 @@ function AdminNav() {
 
       <button
         onClick={handleLogOut}
-        className="bg-red-600 duration-200 transition-all  hover:bg-red-700 font-bold absolute bottom-5 w-[85%] py-2 rounded-lg "
+        className="bg-red-600 left-[50%] translate-x-[-50%] duration-200 transition-all  hover:bg-red-700 font-bold absolute bottom-5 w-[85%] py-2 rounded-lg "
       >
         Log out
       </button>

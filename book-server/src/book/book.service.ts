@@ -26,7 +26,7 @@ export class BookService {
   }
 
   async createBookService(book: CreateBook, file) {
-    console.log('Create book service');
+    console.log('Create book service', book);
     const newBook = new this.bookModel({
       ...book,
       quantity: parseInt(book.quantity, 10),
@@ -103,7 +103,7 @@ export class BookService {
       img: string;
     },
   ) {
-    console.log('Inside book service', bookId);
+    console.log('Inside book service', bookId, file, bookEdit);
     const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
     if (!isValidBookId) {
       throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
@@ -132,35 +132,52 @@ export class BookService {
         return updateBookMdb;
         // }
       } else {
-        const updateBookMdb = await this.bookModel.findByIdAndUpdate(
-          { _id: bookId },
-          // { $set: { ...bookEdit, img: file.filename } },
-          {
-            $set: {
-              title: bookEdit?.title,
-              featured: bookEdit?.featured,
-              quantity: Number(bookEdit?.quantity),
-              img: file.filname,
-            },
-          },
-          { new: true },
-        );
-
-        const filePath = join(this.uploadDir, bookEdit.img);
-
         try {
-          console.log(filePath);
+          const updateBookMdb = await this.bookModel.findByIdAndUpdate(
+            { _id: bookId },
+            // { $set: { ...bookEdit, img: file.filename } },
+            {
+              $set: {
+                title: bookEdit?.title,
+                featured: bookEdit?.featured,
+                quantity: Number(bookEdit?.quantity),
+                img: file.filename,
+              },
+            },
+            { new: true },
+          );
 
-          await fs.access(filePath);
-          await fs.unlink(filePath);
+          const filePath = join(this.uploadDir, bookEdit.img);
+
+          try {
+            console.log(filePath);
+
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+          } catch (e) {
+            if (e.code === 'ENOENT') {
+              console.error('File does not exist');
+            } else {
+              console.error('Error deleting file:', e);
+            }
+          }
+          return updateBookMdb;
         } catch (e) {
-          if (e.code === 'ENOENT') {
-            console.error('File does not exist');
-          } else {
-            console.error('Error deleting file:', e);
+          const filePath = join(this.uploadDir, file.filename);
+
+          try {
+            console.log(filePath);
+
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+          } catch (e) {
+            if (e.code === 'ENOENT') {
+              console.error('File does not exist');
+            } else {
+              console.error('Error deleting file:', e);
+            }
           }
         }
-        return updateBookMdb;
       }
     } catch (e) {
       throw new HttpException('Invalid input', HttpStatus.BAD_REQUEST);
@@ -175,18 +192,28 @@ export class BookService {
       throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
     }
 
-    const updateBook = this.bookModel.findByIdAndUpdate(
-      { _id: bookId },
-      { $push: { likedBy: body.user } },
-      { new: true },
-    );
+    const findLikedBook = await this.bookModel.findById({ _id: bookId });
 
-    return updateBook;
+    if (!findLikedBook.likedBy.includes(body.user)) {
+      const updateBook = this.bookModel.findByIdAndUpdate(
+        { _id: bookId },
+        { $push: { likedBy: body.user } },
+        { new: true },
+      );
+      return updateBook;
+    } else {
+      const updateBook = this.bookModel.findByIdAndUpdate(
+        { _id: bookId },
+        { $pull: { likedBy: body.user } },
+        { new: true },
+      );
+      return updateBook;
+    }
   }
 
   async borrowBookService(
     bookId: string,
-    body: { user: string; returnedBy?: string },
+    body: { user: string; name: string; returnedBy?: string },
   ) {
     const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
     if (!isValidBookId) {

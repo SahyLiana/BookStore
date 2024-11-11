@@ -16,7 +16,7 @@ type Props = {
     img: string;
     featured: boolean;
     likedBy?: string[];
-    borrowedBy?: { by: string; returnedBy?: string }[];
+    borrowedBy?: { user: string; returnedBy?: string }[];
     quantity: number;
   };
 };
@@ -33,23 +33,27 @@ type BookType = {
   title: string;
   img: string;
   featured: boolean;
-  borrowedBy?: { by: string; returnedBy?: string }[];
+  // borrowedBy?: { by: string; returnedBy?: string }[];
   quantity: number;
 };
 
 function BookAdmin({ book }: Props) {
   const { enqueueSnackbar } = useSnackbar();
+
+  const token = localStorage.getItem("token");
+
   const [updateBook, setUpdateBook] = useState<BookType>({
     _id: "",
     title: "",
     img: "",
     featured: false,
+    // borrowedBy: [],
     quantity: 0,
   });
   const [path, setPath] = useState("");
   const [bookImg, setBookImg] = useState<File | undefined>();
-  const { deleteBookStore } = bookStore();
-  const token = localStorage.getItem("token");
+  const { deleteBookStore, updateBookStore } = bookStore();
+  // const token = localStorage.getItem("token");
   const [isOpenEditModal, setIsOpenEditModal] = useState(false);
 
   const location = useLocation();
@@ -102,6 +106,34 @@ function BookAdmin({ book }: Props) {
     }));
   };
 
+  const handleSubmitUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (updateBook.quantity > 0) {
+      console.log("Update input is:", updateBook);
+      try {
+        await updateBookStore(updateBook, bookImg, token);
+        enqueueSnackbar("Book updated successfuly", {
+          variant: "success",
+          anchorOrigin: { horizontal: "right", vertical: "bottom" },
+        });
+      } catch (e) {
+        console.log(e);
+        enqueueSnackbar("Error input or network issue", {
+          variant: "error",
+          anchorOrigin: { horizontal: "right", vertical: "bottom" },
+        });
+      } finally {
+        closeModal();
+      }
+    } else {
+      console.log("Update input quantity cant be 0");
+      enqueueSnackbar("Update input quantity cant be 0", {
+        variant: "error",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
+    }
+  };
+
   const closeModal = () => {
     setIsOpenEditModal(false);
     setUpdateBook({
@@ -144,21 +176,23 @@ function BookAdmin({ book }: Props) {
               this book
             </p>
           )}
-          <div className="flex gap-2">
-            <EditIcon
-              className="text-green-500 rounded-lg hover:border-green-500 p-1 hover:border"
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onClick={(e: any) => openEditBookModal(e)}
-              style={{ fontSize: "1.5rem" }}
-            />
+          {path === "books" && (
+            <div className="flex gap-2">
+              <EditIcon
+                className="text-green-500 rounded-lg hover:border-green-500 p-1 hover:border"
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onClick={(e: any) => openEditBookModal(e)}
+                style={{ fontSize: "1.5rem" }}
+              />
 
-            <DeleteIcon
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onClick={(e: any) => handleDeleteBook(e, book._id)}
-              className="text-red-500 p-1 hover:border-red-500 rounded-lg hover:border"
-              style={{ fontSize: "1.5rem" }}
-            />
-          </div>
+              <DeleteIcon
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onClick={(e: any) => handleDeleteBook(e, book._id)}
+                className="text-red-500 p-1 hover:border-red-500 rounded-lg hover:border"
+                style={{ fontSize: "1.5rem" }}
+              />
+            </div>
+          )}
         </div>
       </div>
       <Modal
@@ -169,7 +203,7 @@ function BookAdmin({ book }: Props) {
       >
         <h1 className="text-blue-700 text-3xl mb-2 font-bold">Update Book</h1>
         <hr className="mb-5" />
-        <form>
+        <form onSubmit={handleSubmitUpdate}>
           <label className="text-lg" htmlFor="title">
             Book title:
           </label>
@@ -214,6 +248,7 @@ function BookAdmin({ book }: Props) {
               style={{ display: "none" }}
               id="bookImg"
               accept=".png,.jpeg,.jpg"
+              name="bookImg"
               onChange={handleChangeImg}
             />
           </label>
@@ -240,7 +275,7 @@ function BookAdmin({ book }: Props) {
           />
           <br />
           <button className="bg-blue-600 text-white text-lg px-4 py-2 hover:bg-blue-700  w-full">
-            Register
+            Update
           </button>
         </form>
       </Modal>

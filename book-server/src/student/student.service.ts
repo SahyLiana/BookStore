@@ -19,7 +19,7 @@ export class StudentService {
   async getAllStudentService() {
     console.log('Get all student service');
 
-    const students = await this.studentModel.find();
+    const students = await this.studentModel.find({}, { password: 0 });
 
     return students;
   }

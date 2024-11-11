@@ -7,7 +7,7 @@ type BookType = {
   img: string;
   featured: boolean;
   likedBy?: string[];
-  borrowedBy: { by: string; returnedBy?: string }[];
+  borrowedBy: { user: string; name?: string; returnedBy?: string }[];
   quantity: number;
 };
 
@@ -31,6 +31,12 @@ type Actions = {
   ) => void;
   getAllBookStore: () => void;
   deleteBookStore: (bookId: string, token: string | null) => void;
+  updateBookStore: (
+    updateBookInput: Omit<BookType, "borrowedBy" | "likedBy">,
+    bookImg: File | undefined,
+    token: string | null
+  ) => void;
+  setBooks: (newBooks: BookType[]) => void;
 };
 
 // const booksValue = [
@@ -96,6 +102,13 @@ type Actions = {
 const bookStore = create<State & Actions>((set) => ({
   // books: [...booksValue],
   books: [],
+
+  setBooks: (newBooks: BookType[]) => {
+    set((state) => ({
+      ...state,
+      books: [...newBooks],
+    }));
+  },
 
   likedFunction: (bookTitle, userId) => {
     console.log(userId);
@@ -186,7 +199,7 @@ const bookStore = create<State & Actions>((set) => ({
               book.title === bookTitle
                 ? {
                     ...book,
-                    borrowedBy: [...book.borrowedBy, { by: userEmail }],
+                    borrowedBy: [...book.borrowedBy, { user: userEmail }],
                   }
                 : book
             ),
@@ -252,6 +265,36 @@ const bookStore = create<State & Actions>((set) => ({
     set((state) => ({
       ...state,
       books: state.books.filter((book) => book._id !== bookId),
+    }));
+  },
+
+  updateBookStore: async (
+    updateBookInput: Omit<BookType, "borrowedBy" | "likedBy">,
+    bookImg: File | undefined,
+    token: string | null
+  ) => {
+    console.log("Inside updateBookStore", updateBookInput, bookImg, token);
+
+    const formData = new FormData();
+
+    formData.append("title", updateBookInput.title);
+    formData.append("img", updateBookInput.img);
+    formData.append("featured", String(updateBookInput.featured));
+    if (bookImg) formData.append("bookImg", bookImg);
+    formData.append("quantity", updateBookInput.quantity.toString());
+    const updateCall = await axios.patch(
+      `http://localhost:3000/api/book/${updateBookInput._id}`,
+      formData,
+      { headers: { Authorization: token } }
+    );
+
+    console.log("update response call", updateCall.data);
+
+    set((state) => ({
+      ...state,
+      books: state.books.map((book) =>
+        book._id === updateBookInput._id ? { ...updateCall.data } : book
+      ),
     }));
   },
 }));

@@ -7,8 +7,9 @@ import { useEffect } from "react";
 import bookStore from "../store/BookStore";
 
 function Dashboard() {
-  const { admin } = userStore();
+  const { admin, getAllStudents } = userStore();
   const { getAllBookStore } = bookStore();
+  const token = localStorage.getItem("token");
 
   console.log(admin);
 
@@ -20,6 +21,16 @@ function Dashboard() {
         console.log(e);
       }
     };
+
+    const getStudentsFromStore = async () => {
+      try {
+        await getAllStudents(token);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getStudentsFromStore();
+
     getBookFromStore();
   }, []);
 
@@ -31,7 +42,7 @@ function Dashboard() {
       {/* <div className="w-full"> */}
       {/* <HomeDashboard /> */}
       <div className="text-slate-100 py-14   w-full">
-        <div className="flex overflow-x-hidden items-center px-10 shadow-sm pb-10 shadow-blue-400 justify-between">
+        <div className="flex overflow-x-hidden items-center px-10  pb-10  border-b border-blue-400 justify-between">
           <motion.h1
             initial="hidden"
             viewport={{ once: true }}

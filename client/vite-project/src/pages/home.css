@@ -6,7 +6,7 @@
     ),
     url("../assets//library.jpg");
 
-  /* color: rgb(214, 214, 212); */
+  /* color:#eab308; */
   background-repeat: no-repeat;
   background-size: cover;
 
@@ -16,4 +16,9 @@
 .stick {
   position: sticky;
   top: 0;
+}
+
+.test {
+  /* color:#FFC400 ; */
+  color: #20f32e;
 }

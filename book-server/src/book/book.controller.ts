@@ -119,7 +119,7 @@ export class BookController {
   @UseGuards(JwtAuthGuard)
   borrowBook(
     @Param('bookId') bookId: string,
-    @Body() body: { user: string; returnedBy?: string },
+    @Body() body: { user: string; name: string; returnedBy?: string },
   ) {
     return this.bookService.borrowBookService(bookId, body);
   }

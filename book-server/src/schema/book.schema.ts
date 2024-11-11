@@ -18,7 +18,7 @@ export class Book {
   featured: boolean;
 
   @Prop({ required: false })
-  borrowedBy: { user: string; returnedBy?: string }[];
+  borrowedBy: { user: string; name: string; returnedBy?: string }[];
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);

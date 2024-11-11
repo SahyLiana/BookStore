@@ -10,7 +10,7 @@ type BookType = {
   img: string;
   featured: boolean;
   likedBy?: string[];
-  borrowedBy?: { by: string; returnedBy?: string }[];
+  borrowedBy?: { user: string; returnedBy?: string }[];
   quantity: number;
 };
 
@@ -35,7 +35,9 @@ function BorrowedBooks() {
   };
 
   useEffect(() => {
-    setBorrowedBook(books.filter((book) => book.borrowedBy?.length > 0));
+    setBorrowedBook(
+      books.filter((book) => book.borrowedBy?.length > 0 && book)
+    );
   }, []);
 
   return (
@@ -75,9 +77,9 @@ function BorrowedBooks() {
               <SearchIcon />
             </button>
           </form>
-          <button className="bg-green-700 px-2 tex-md font-semibold rounded-lg hover:bg-green-800 duration-200">
+          {/* <button className="bg-green-700 px-2 tex-md font-semibold rounded-lg hover:bg-green-800 duration-200">
             Create book
-          </button>
+          </button> */}
         </motion.div>
       </div>
 

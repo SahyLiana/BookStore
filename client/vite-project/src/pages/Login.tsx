@@ -3,10 +3,12 @@ import { motion } from "framer-motion";
 import Wbook from "../assets/wbook.jpg";
 import { useRef } from "react";
 import axios from "axios";
+import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
   const adminUserRef = useRef<HTMLInputElement>(null);
+  const { enqueueSnackbar } = useSnackbar();
   const adminpwdRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
@@ -33,7 +35,15 @@ function Login() {
 
       localStorage.setItem("token", `Bearer ${adminApi.data}`);
       navigate("/dashboard/home");
+      enqueueSnackbar("Logged in successfuly", {
+        variant: "success",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
     } catch (e: any) {
+      enqueueSnackbar("Wrong credentials", {
+        variant: "error",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
       console.log(e);
     }
   };
