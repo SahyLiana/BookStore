@@ -10,11 +10,14 @@ import BannerImg from "../assets/girlslib.jpg";
 
 import "./home.css";
 import bookStore from "../store/BookStore";
+import userStore from "../store/UserStore";
+import axios from "axios";
 
 function Home() {
   const [activeSection, setActiveSection] = useState("Home");
   const { getAllBookStore } = bookStore();
   const [sticky, setSticky] = useState(false);
+  const { loggedStudent, setStudent } = userStore();
 
   useEffect(() => {
     const handleSticky = () => {
@@ -26,6 +29,30 @@ function Home() {
     };
     window.addEventListener("scroll", handleSticky);
     return () => removeEventListener("scroll", handleSticky);
+  }, []);
+
+  useEffect(() => {
+    const getStudentFun = async () => {
+      try {
+        const getNextOutlet = await axios.get(
+          "http://localhost:3000/api/student/dashboard",
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("tokenstd")}`,
+            },
+          }
+        );
+
+        console.log("getStudent", getNextOutlet);
+        // setAdmin(getNextOutlet.data);
+        setStudent(getNextOutlet.data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        console.log(e);
+      }
+    };
+    console.log("Student token", localStorage.getItem("tokenstd"));
+    getStudentFun();
   }, []);
 
   useEffect(() => {
@@ -145,7 +172,8 @@ function Home() {
         <div className="w-[80%] mx-auto py-14">
           <Categories />
           <Books />
-          <MyBooks />
+          {loggedStudent && <MyBooks />}
+
           <Featured />
         </div>
         <Footer />

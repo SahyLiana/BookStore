@@ -3,13 +3,16 @@ import Book from "../components/Book";
 import bookStore from "../store/BookStore";
 import SearchIcon from "@mui/icons-material/Search";
 import { motion } from "framer-motion";
+import userStore from "../store/UserStore";
+
 // import "./bookFiles.css";
 
 type BooksType = {
+  _id: string;
   title: string;
   img: string;
   featured: boolean;
-  borrowedBy?: { by: string; returnedBy?: string }[];
+  borrowedBy?: { user: string; name?: string; returnedBy?: string }[];
   quantity: number;
 };
 
@@ -20,6 +23,7 @@ function MyBooks() {
   const [bookSearched, setBookSearched] = useState<BooksType[]>([]);
 
   const { books } = bookStore();
+  const { loggedStudent } = userStore();
   const [booksView, setBooksView] = useState<BooksType[]>([]);
 
   // console.log(books);
@@ -57,14 +61,16 @@ function MyBooks() {
     if (viewAll) {
       setBooksView(
         books.filter((book) =>
-          book.borrowedBy.find((borrow) => borrow.by === "myId")
+          book.borrowedBy.find((borrow) => borrow.user === loggedStudent?.email)
         )
       );
     } else {
       setBooksView(
         books
           .filter((book) =>
-            book.borrowedBy.find((borrow) => borrow.by === "myId")
+            book.borrowedBy.find(
+              (borrow) => borrow.user === loggedStudent?.email
+            )
           )
           .slice(0, 4)
       );

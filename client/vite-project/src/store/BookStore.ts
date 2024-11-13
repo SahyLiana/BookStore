@@ -37,6 +37,7 @@ type Actions = {
     token: string | null
   ) => void;
   setBooks: (newBooks: BookType[]) => void;
+  returnBookStore: (bookId: string, user: string, token: string | null) => void;
 };
 
 // const booksValue = [
@@ -294,6 +295,33 @@ const bookStore = create<State & Actions>((set) => ({
       ...state,
       books: state.books.map((book) =>
         book._id === updateBookInput._id ? { ...updateCall.data } : book
+      ),
+    }));
+  },
+
+  returnBookStore: async (
+    bookId: string,
+    user: string,
+    token: string | null
+  ) => {
+    console.log("Inside returnBookStore", bookId, user, token);
+    await axios.patch(
+      `http://localhost:3000/api/book/return/${bookId}/${user}`,
+      {},
+      { headers: { Authorization: token } }
+    );
+
+    set((state) => ({
+      ...state,
+      books: state.books.map((book) =>
+        book._id === bookId
+          ? {
+              ...book,
+              borrowedBy: book.borrowedBy.filter(
+                (borrow) => borrow.user !== user
+              ),
+            }
+          : book
       ),
     }));
   },

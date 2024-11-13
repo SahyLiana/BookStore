@@ -105,11 +105,13 @@ export class StudentService {
     }
 
     if (findStudent.password === studentData.password) {
+      console.log(findStudent);
       const userData = {
         email: findStudent.email,
         _id: findStudent._id,
+        name: findStudent.name,
       };
-      return this.jwtService.sign(userData);
+      return { ...findStudent, token: this.jwtService.sign(userData) };
     }
 
     throw new HttpException('Invalid credential', HttpStatus.UNAUTHORIZED);

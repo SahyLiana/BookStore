@@ -11,7 +11,7 @@ type BooksType = {
   img: string;
   featured: boolean;
   likedBy?: string[];
-  borrowedBy?: { by: string; returnedBy?: string }[];
+  borrowedBy?: { user: string; name?: string; returnedBy?: string }[];
   quantity: number;
 };
 

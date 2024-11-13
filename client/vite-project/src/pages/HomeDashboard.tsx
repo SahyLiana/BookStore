@@ -5,11 +5,15 @@ import { motion } from "framer-motion";
 import bookStore from "../store/BookStore";
 import userStore from "../store/UserStore";
 import Chart from "react-apexcharts";
+import { useSnackbar } from "notistack";
+// import axios from "axios";
 
 function HomeDashboard() {
   const [loading, setLoading] = useState(true);
-  const { books } = bookStore();
+  const { enqueueSnackbar } = useSnackbar();
+  const { books, returnBookStore } = bookStore();
   const { students } = userStore();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     setLoading(false);
@@ -49,28 +53,28 @@ function HomeDashboard() {
     // },
   ];
 
-  const bookStatus = [
-    {
-      id: "q121324i555",
-      title: "Title 1",
-      borrowedBy: "John Doe",
-    },
-    {
-      id: "rr21324i555",
-      title: "Title 2",
-      borrowedBy: "Jane Doe",
-    },
-    {
-      id: "qty121324i555",
-      title: "Title 3",
-      borrowedBy: "Clack Doe",
-    },
-    {
-      id: "q121324i555",
-      title: "Title 4",
-      borrowedBy: "Smith Doe",
-    },
-  ];
+  // const bookStatus = [
+  //   {
+  //     id: "q121324i555",
+  //     title: "Title 1",
+  //     borrowedBy: "John Doe",
+  //   },
+  //   {
+  //     id: "rr21324i555",
+  //     title: "Title 2",
+  //     borrowedBy: "Jane Doe",
+  //   },
+  //   {
+  //     id: "qty121324i555",
+  //     title: "Title 3",
+  //     borrowedBy: "Clack Doe",
+  //   },
+  //   {
+  //     id: "q121324i555",
+  //     title: "Title 4",
+  //     borrowedBy: "Smith Doe",
+  //   },
+  // ];
 
   const tableVariants = {
     initial: {
@@ -158,6 +162,23 @@ function HomeDashboard() {
       }, 0),
   ];
 
+  const returnBook = async (bookId: string, user: string) => {
+    console.log(token);
+    try {
+      await returnBookStore(bookId, user, token);
+      enqueueSnackbar("Book returned", {
+        variant: "success",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
+    } catch (e) {
+      console.log(e);
+      enqueueSnackbar("Something went wrong", {
+        variant: "error",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
+    }
+  };
+
   const showBookBorrowed = books.filter((book) => book.borrowedBy && book);
 
   return (
@@ -233,69 +254,42 @@ function HomeDashboard() {
           </tr>
         </thead>
         <tbody className="">
-          {showBookBorrowed.map(
-            (book, index) =>
-              // book.borrowedBy.length &&
-              book.borrowedBy.map((borrow) => (
-                <motion.tr
-                  key={book._id}
-                  variants={tableVariants}
-                  initial="initial"
-                  whileInView={"animate"}
-                  viewport={{
-                    once: true,
-                  }}
-                  custom={index}
-                  className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
+          {showBookBorrowed.map((book, index) =>
+            // book.borrowedBy.length &&
+            book.borrowedBy.map((borrow) => (
+              <motion.tr
+                key={book._id}
+                variants={tableVariants}
+                initial="initial"
+                whileInView={"animate"}
+                viewport={{
+                  once: true,
+                }}
+                custom={index}
+                className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
+              >
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
                 >
-                  <th
-                    scope="row"
-                    className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
+                  {book._id}
+                </th>
+                <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                  {book.title}
+                </td>
+                <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                  {borrow.name}
+                </td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => returnBook(book._id, borrow.user)}
+                    className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
                   >
-                    {book._id}
-                  </th>
-                  <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                    {book.title}
-                  </td>
-                  <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                    {borrow.name}
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm">
-                      Returned
-                    </button>
-                  </td>
-                </motion.tr>
-              ))
-            // <motion.tr
-            //   key={book._id}
-            //   variants={tableVariants}
-            //   initial="initial"
-            //   whileInView={"animate"}
-            //   viewport={{
-            //     once: true,
-            //   }}
-            //   custom={index}
-            //   className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
-            // >
-            //   <th
-            //     scope="row"
-            //     className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
-            //   >
-            //     {book._id}
-            //   </th>
-            //   <td className="px-6 py-4 text-slate-400 font-bold text-md">
-            //     {book.title}
-            //   </td>
-            //   <td className="px-6 py-4 text-slate-400 font-bold text-md">
-            //     {/* {book.borrowedBy} */}
-            //   </td>
-            //   <td className="px-6 py-4">
-            //     <button className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm">
-            //       Returned
-            //     </button>
-            //   </td>
-            // </motion.tr>
+                    Returned
+                  </button>
+                </td>
+              </motion.tr>
+            ))
           )}
         </tbody>
       </table>

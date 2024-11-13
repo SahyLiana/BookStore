@@ -27,10 +27,16 @@ export class StudentController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe())
   registerStudent(@Body() studentData: StudentDto) {
     return this.studentService.registerStudentService(studentData);
+  }
+
+  @Get('dashboard')
+  @UseGuards(JwtAuthGuard)
+  getStudentDashboard(@Req() req: Request) {
+    console.log('Request std', req);
+    return this.studentService.getDashboardStudentService(req.user);
   }
 
   @Get(':id')
@@ -48,12 +54,6 @@ export class StudentController {
   @Post('login')
   studentLogin(@Body() studentData: StudentLoginDto) {
     return this.studentService.loginUserService(studentData);
-  }
-
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  getStudentDashboard(@Req() req: Request) {
-    return this.studentService.getDashboardStudentService(req);
   }
 
   @Get('test/:id')

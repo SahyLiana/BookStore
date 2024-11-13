@@ -17,21 +17,34 @@ type Student = {
 type State = {
   admin: Omit<adminLoginType, "password">;
   students: Omit<Student, "password">[];
+  loggedStudent: Omit<Student, "password"> | null;
 };
 
 type Actions = {
   setAdmin: (admin: Omit<adminLoginType, "password">) => void;
   addStudentStore: (
-    studentData: Omit<Student, "_id" | "password">,
-    token: string | null
+    studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">
+    // token: string | null
   ) => void;
   getAllStudents: (token: string | null) => void;
   deleteStudentStore: (user: string, token: string | null) => void;
+  // registerStudentStore: (studentData: Omit<Student, "_id">) => void;
+  loginStudent: (student: Omit<Student, "_id" | "name">) => Promise<string>;
+  logoutStudent: () => void;
+  setStudent: (student: Omit<Student, "password">) => void;
 };
 
 const userStore = create<Actions & State>((set) => ({
   admin: { username: "" },
   students: [],
+  loggedStudent: null,
+
+  setStudent(student: Omit<Student, "password">) {
+    set((state) => ({
+      ...state,
+      loggedStudent: { ...student },
+    }));
+  },
 
   setAdmin(admin) {
     console.log("Inside setAdmin store", admin);
@@ -43,15 +56,15 @@ const userStore = create<Actions & State>((set) => ({
   },
 
   async addStudentStore(
-    studentData: Omit<Student, "_id" | "password">,
-    token: string | null
+    studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">
+    // token: string | null
   ) {
     console.log("Inside addStudentStore", studentData);
 
     const registerStudentCall = await axios.post(
       "http://localhost:3000/api/student/",
-      studentData,
-      { headers: { Authorization: token } }
+      studentData
+      // { headers: { Authorization: token } }
     );
 
     console.log("RegisterCall", registerStudentCall.data);
@@ -94,6 +107,31 @@ const userStore = create<Actions & State>((set) => ({
       students: state.students.filter(
         (student) => student._id !== deletedStudentCall.data._id
       ),
+    }));
+  },
+
+  async loginStudent(student: Omit<Student, "_id" | "name">) {
+    console.log("Inside loginStudent", student);
+
+    const loginCall = await axios.post(
+      "http://localhost:3000/api/student/login",
+      student
+    );
+
+    console.log("Response api", loginCall.data.token, loginCall.data._doc);
+
+    set((state) => ({
+      ...state,
+      loggedStudent: { ...loginCall.data._doc },
+    }));
+
+    return loginCall.data.token;
+  },
+
+  logoutStudent() {
+    set((state) => ({
+      ...state,
+      loggedStudent: null,
     }));
   },
 }));

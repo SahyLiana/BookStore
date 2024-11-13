@@ -233,17 +233,17 @@ export class BookService {
     return borrowBook;
   }
 
-  async returnBookService(bookId: string, body: { user: string }) {
+  async returnBookService(bookId: string, user: string) {
     const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
     if (!isValidBookId) {
       throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
     }
 
-    console.log('Inside likebookservice:', bookId, body);
+    console.log('Inside likebookservice:', bookId, user);
 
     const returnBook = this.bookModel.findByIdAndUpdate(
       { _id: bookId },
-      { $pull: { borrowedBy: { user: body.user } } },
+      { $pull: { borrowedBy: { user: user } } },
       { new: true },
 
       // { $push: { likedBy: body.user } },

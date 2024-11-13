@@ -124,9 +124,9 @@ export class BookController {
     return this.bookService.borrowBookService(bookId, body);
   }
 
-  @Patch('return/:bookId')
+  @Patch('return/:bookId/:user')
   @UseGuards(JwtAuthGuard)
-  returnBook(@Param('bookId') bookId: string, @Body() body: { user: string }) {
-    return this.bookService.returnBookService(bookId, body);
+  returnBook(@Param('bookId') bookId: string, @Param('user') user: string) {
+    return this.bookService.returnBookService(bookId, user);
   }
 }

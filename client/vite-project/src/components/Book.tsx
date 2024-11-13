@@ -13,7 +13,7 @@ type Props = {
     img: string;
     featured: boolean;
     likedBy?: string[];
-    borrowedBy?: { by: string; returnedBy?: string }[];
+    borrowedBy?: { user: string; name?: string; returnedBy?: string }[];
     quantity: number;
   };
 };
@@ -53,14 +53,14 @@ function Book({ book }: Props) {
     quantity: number,
     e: React.FormEvent<HTMLFormElement>,
     userId = "myId",
-    borrowedBy?: { by: string; returnedBy?: string }[]
+    borrowedBy?: { name?: string; user: string; returnedBy?: string }[]
   ) => {
     e.stopPropagation();
     console.log("BorrowedByLength", borrowedBy?.length);
     if (
       borrowedBy &&
       borrowedBy.length < quantity &&
-      !borrowedBy?.find((borrow) => borrow.by === "myId")
+      !borrowedBy?.find((borrow) => borrow.user === "myId")
     ) {
       borrowBookFunction(bookTitle, userId);
     } else {
@@ -111,7 +111,7 @@ function Book({ book }: Props) {
             </p>
           )}
 
-          {book.borrowedBy?.find((borrow) => borrow.by === "myId") && (
+          {book.borrowedBy?.find((borrow) => borrow.user === "myId") && (
             <p className="absolute p-1 text-sm top-0 rounded-tl-xl left-0 bg-green-700 text-white">
               You have borrowed
             </p>
@@ -180,7 +180,7 @@ function Book({ book }: Props) {
               </p>
             )}
 
-            {book.borrowedBy?.find((borrow) => borrow.by === "myId") && (
+            {book.borrowedBy?.find((borrow) => borrow.user === "myId") && (
               <p className="absolute p-1 text-sm top-0 rounded-tl-xl left-0 bg-green-700 text-white">
                 You have borrowed
               </p>
@@ -196,7 +196,7 @@ function Book({ book }: Props) {
             </p>
             {book.borrowedBy &&
               book.borrowedBy.length < book.quantity &&
-              book.borrowedBy?.find((borrow) => borrow.by === "myId") && (
+              book.borrowedBy?.find((borrow) => borrow.user === "myId") && (
                 <AddCircleOutlineIcon
                   onClick={(e: any) =>
                     handleBorrow(
