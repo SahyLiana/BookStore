@@ -5,6 +5,8 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import bookStore from "../store/BookStore";
 import { useState } from "react";
 import Modal from "react-modal";
+import userStore from "../store/UserStore";
+import { useSnackbar } from "notistack";
 
 type Props = {
   book: {
@@ -28,6 +30,7 @@ type BookType = {
 Modal.setAppElement("#root");
 function Book({ book }: Props) {
   // const [isLiked, setIsLiked] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
   const { likedFunction, books, borrowBookFunction } = bookStore();
   const [singleBookModal, setSingleBookModal] = useState<BookType>({
     title: "",
@@ -36,23 +39,33 @@ function Book({ book }: Props) {
     likedBy: [],
   });
   const [isOpenSingleBookModal, setIsOpenSingleBookModal] = useState(false);
+  const { loggedStudent } = userStore();
 
-  const handleLiked = (
-    bookTitle: string,
+  const handleLiked = async (
+    bookId: string,
     e: React.FormEvent<HTMLFormElement>,
-    userId = "myId"
+    user: string | undefined
   ) => {
     e.stopPropagation();
-    console.log("BookTile and userId are:", bookTitle);
-    likedFunction(bookTitle, userId);
+    const token = localStorage.getItem("tokenstd");
+    console.log("BookTile and userId are:", bookId);
+    try {
+      await likedFunction(bookId, user, token);
+    } catch (e) {
+      console.log(e);
+      enqueueSnackbar("Unauthorized", {
+        variant: "error",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
+    }
   };
 
-  const handleBorrow = (
-    bookTitle: string,
+  const handleBorrow = async (
+    bookId: string,
 
     quantity: number,
     e: React.FormEvent<HTMLFormElement>,
-    userId = "myId",
+
     borrowedBy?: { name?: string; user: string; returnedBy?: string }[]
   ) => {
     e.stopPropagation();
@@ -60,11 +73,36 @@ function Book({ book }: Props) {
     if (
       borrowedBy &&
       borrowedBy.length < quantity &&
-      !borrowedBy?.find((borrow) => borrow.user === "myId")
+      !borrowedBy?.find((borrow) => borrow.user === loggedStudent?.email)
     ) {
-      borrowBookFunction(bookTitle, userId);
+      if (loggedStudent) {
+        try {
+          const token = localStorage.getItem("tokenstd");
+          await borrowBookFunction(
+            bookId,
+            loggedStudent.email,
+            loggedStudent?.name,
+            token
+          );
+          enqueueSnackbar("Book borrowed", {
+            variant: "success",
+            anchorOrigin: { horizontal: "right", vertical: "bottom" },
+          });
+        } catch (e) {
+          console.log(e);
+          console.log("You cant borrow this anymore");
+          enqueueSnackbar("Unauthorized", {
+            variant: "error",
+            anchorOrigin: { horizontal: "right", vertical: "bottom" },
+          });
+        }
+      }
     } else {
       console.log("You cannot borrow it anymore");
+      enqueueSnackbar("You cannot borrow it anymore", {
+        variant: "error",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
     }
   };
 
@@ -111,7 +149,9 @@ function Book({ book }: Props) {
             </p>
           )}
 
-          {book.borrowedBy?.find((borrow) => borrow.user === "myId") && (
+          {book.borrowedBy?.find(
+            (borrow) => borrow.user === loggedStudent?.email
+          ) && (
             <p className="absolute p-1 text-sm top-0 rounded-tl-xl left-0 bg-green-700 text-white">
               You have borrowed
             </p>
@@ -125,38 +165,44 @@ function Book({ book }: Props) {
             {book.title}
           </p>
 
-          <div className="">
-            {book.borrowedBy &&
-              book.borrowedBy.length < book.quantity &&
-              !book.borrowedBy?.find(
-                (borrow) => borrow.returnedBy === "myId"
-              ) && (
-                <AddCircleOutlineIcon
-                  onClick={(e: any) =>
-                    handleBorrow(
-                      book.title,
+          {loggedStudent && (
+            <div className="">
+              {book.borrowedBy &&
+                book.borrowedBy.length < book.quantity &&
+                !book.borrowedBy?.find(
+                  (borrow) => borrow.user === loggedStudent.email
+                ) && (
+                  <AddCircleOutlineIcon
+                    onClick={(e: any) =>
+                      handleBorrow(
+                        book._id,
 
-                      book.quantity,
-                      e,
-                      "myId",
-                      book.borrowedBy
-                    )
-                  }
-                  className="hover:text-green-800 cursor-pointer mr-2"
-                />
-              )}
+                        book.quantity,
+                        e,
+                        book.borrowedBy
+                      )
+                    }
+                    className="hover:text-green-800 cursor-pointer mr-2"
+                  />
+                )}
 
-            <FavoriteIcon
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onClick={(e: any) => handleLiked(book.title, e)}
-              className={`hover:text-red-700 cursor-pointer  ${book.likedBy?.includes("myId") && "text-red-800"}`}
-            />
-            <p className="text-sm mt-1">
-              {book.likedBy?.includes("myId")
-                ? `You and ${book.likedBy && book.likedBy.length - 1} other people liked this book`
-                : `${book.likedBy?.length} people liked this book`}
-            </p>
-          </div>
+              <FavoriteIcon
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onClick={(e: any) =>
+                  handleLiked(book._id, e, loggedStudent.email)
+                }
+                className={`hover:text-red-700 cursor-pointer  ${book.likedBy?.includes(loggedStudent.email) && "text-red-800"}`}
+              />
+              <p className="text-sm mt-1">
+                {loggedStudent?.email &&
+                book.likedBy?.includes(loggedStudent.email)
+                  ? book.likedBy.length >= 2
+                    ? `You and ${book.likedBy && book.likedBy.length - 1} other people liked this book`
+                    : "You liked this book"
+                  : `${book.likedBy?.length} people liked this book`}
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <Modal
@@ -194,35 +240,44 @@ function Book({ book }: Props) {
               Lorem ipsum, dolor sit amet consectetur adipisicing elit.
               Consequatur odit eaque maiores perferendis asperiores doloremque
             </p>
-            {book.borrowedBy &&
-              book.borrowedBy.length < book.quantity &&
-              book.borrowedBy?.find((borrow) => borrow.user === "myId") && (
-                <AddCircleOutlineIcon
+            {loggedStudent && (
+              <div className="">
+                {book.borrowedBy &&
+                  book.borrowedBy.length < book.quantity &&
+                  !book.borrowedBy?.find(
+                    (borrow) => borrow.user === loggedStudent.email
+                  ) && (
+                    <AddCircleOutlineIcon
+                      onClick={(e: any) =>
+                        handleBorrow(
+                          book._id,
+
+                          book.quantity,
+                          e,
+                          book.borrowedBy
+                        )
+                      }
+                      className="hover:text-green-800 cursor-pointer mr-2"
+                    />
+                  )}
+
+                <FavoriteIcon
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onClick={(e: any) =>
-                    handleBorrow(
-                      book.title,
-
-                      book.quantity,
-                      e,
-                      "myId",
-                      book.borrowedBy
-                    )
+                    handleLiked(book._id, e, loggedStudent.email)
                   }
-                  className="hover:text-green-800 cursor-pointer mr-2"
+                  className={`hover:text-red-700 cursor-pointer  ${book.likedBy?.includes(loggedStudent.email) && "text-red-800"}`}
                 />
-              )}
-
-            <FavoriteIcon
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onClick={(e: any) => handleLiked(book.title, e)}
-              className={`hover:text-red-700 cursor-pointer  ${book.likedBy?.includes("myId") && "text-red-800"}`}
-            />
-
-            <p className="text-sm mt-1">
-              {book.likedBy?.includes("myId")
-                ? `You and ${book.likedBy && book.likedBy.length - 1} other people liked this book`
-                : `${book.likedBy?.length} people liked this book`}
-            </p>
+                <p className="text-sm mt-1">
+                  {loggedStudent?.email &&
+                  book.likedBy?.includes(loggedStudent.email)
+                    ? book.likedBy.length >= 2
+                      ? `You and ${book.likedBy && book.likedBy.length - 1} other people liked this book`
+                      : "You liked this book"
+                    : `${book.likedBy?.length} people liked this book`}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </Modal>

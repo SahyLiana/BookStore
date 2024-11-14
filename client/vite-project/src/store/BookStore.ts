@@ -22,12 +22,22 @@ type State = {
 };
 
 type Actions = {
-  likedFunction: (bookTitle: string, userId: string) => void;
-  borrowBookFunction: (bookTitle: string, userId: string) => void;
+  likedFunction: (
+    bookId: string,
+    user: string | undefined,
+    token: string | null
+  ) => void;
+  borrowBookFunction: (
+    bookTitle: string,
+    user: string,
+    name: string,
+    token: string | null,
+    returnBy?: string
+  ) => void;
   createBookStore: (
     createBook: createBookType,
     bookImg: File | undefined,
-    token: string | null
+    token: string
   ) => void;
   getAllBookStore: () => void;
   deleteBookStore: (bookId: string, token: string | null) => void;
@@ -39,65 +49,6 @@ type Actions = {
   setBooks: (newBooks: BookType[]) => void;
   returnBookStore: (bookId: string, user: string, token: string | null) => void;
 };
-
-// const booksValue = [
-//   {
-//     title: "Antman Quanumania",
-//     bookImg: "http://localhost:3000/uploads/antman.jpg",
-//     featured: true,
-//     likedBy: ["1id", "2id", "3id", "4id"],
-//     borrowedBy: [],
-//     quantity: 3,
-//   },
-//   {
-//     title: "Avenger Infinity War",
-//     bookImg: "http://localhost:3000/uploads/avenger.jpeg",
-//     featured: false,
-//     likedBy: ["1id", "2id", "3id"],
-//     borrowedBy: [{ by: "myId", returnedBy: "2024-12-12" }],
-//     quantity: 2,
-//   },
-//   {
-//     title: "Captain America",
-//     bookImg: "http://localhost:3000/uploads/captain.png",
-//     featured: true,
-//     likedBy: ["1id", "2id", "3id", "4id", "5id"],
-//     borrowedBy: [{ by: "myId", returnedBy: "2024-11-12" }],
-//     quantity: 1,
-//   },
-//   {
-//     title: "Learn Javascript",
-//     bookImg: "http://localhost:3000/uploads/js.jpg",
-//     featured: false,
-//     likedBy: ["1id", "2id"],
-//     borrowedBy: [{ by: "1id" }, { by: "2id" }],
-//     quantity: 2,
-//   },
-//   {
-//     title: "Medecine M2",
-//     bookImg: "http://localhost:3000/uploads/medicine.jpg",
-//     featured: true,
-//     likedBy: ["1id"],
-//     borrowedBy: [],
-//     quantity: 4,
-//   },
-//   {
-//     title: "Learn MERN",
-//     bookImg: "http://localhost:3000/uploads/mern.jpg",
-//     featured: false,
-//     likedBy: ["1id", "2id", "3id"],
-//     borrowedBy: [{ by: "myId" }],
-//     quantity: 2,
-//   },
-//   {
-//     title: "Learn React like a pro",
-//     bookImg: "http://localhost:3000/uploads/reactbook.jpg",
-//     featured: false,
-//     likedBy: ["1id", "2id", "3id"],
-//     borrowedBy: [{ by: "1id" }],
-//     quantity: 1,
-//   },
-// ];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const bookStore = create<State & Actions>((set) => ({
@@ -111,103 +62,83 @@ const bookStore = create<State & Actions>((set) => ({
     }));
   },
 
-  likedFunction: (bookTitle, userId) => {
-    console.log(userId);
+  likedFunction: async (bookId, user, token) => {
+    console.log(user);
+    await axios.patch(
+      `http://localhost:3000/api/book/like/${bookId}`,
+      { user: user },
+      { headers: { Authorization: token } }
+    );
+    if (user) {
+      set((state) => {
+        const findBookTitle = state.books.filter((book) => book._id === bookId);
 
-    set((state) => {
-      const findBookTitle = state.books.filter(
-        (book) => book.title === bookTitle
-      );
+        console.log("the findBookTitle", findBookTitle);
 
-      console.log("the findBookTitle", findBookTitle);
+        if (findBookTitle.length) {
+          const findUserId = findBookTitle[0].likedBy?.includes(user);
 
-      if (findBookTitle.length) {
-        const findUserId = findBookTitle[0].likedBy?.includes(userId);
-        let likedBy: string[] = [];
-        console.log("findUserId", findUserId);
+          console.log("findUserId", findUserId);
 
-        if (!findUserId) {
-          if (findBookTitle[0].likedBy) {
-            likedBy = [...findBookTitle[0].likedBy, userId];
+          if (!findUserId) {
+            return {
+              ...state,
+              books: state.books.map((book) =>
+                book._id === bookId
+                  ? { ...book, likedBy: [...(book.likedBy ?? []), user] }
+                  : book
+              ),
+            };
           } else {
-            likedBy = [userId];
+            return {
+              ...state,
+              books: state.books.map((book) =>
+                book._id === bookId
+                  ? {
+                      ...book,
+                      likedBy: book.likedBy?.filter((like) => like !== user),
+                    }
+                  : book
+              ),
+            };
           }
-
-          console.log("Liked books", likedBy);
-
-          console.log("Mapped new liked book:", {
-            ...state,
-            books: state.books.map((book) =>
-              book.title === bookTitle
-                ? { ...book, likedBy: [...likedBy] }
-                : book
-            ),
-          });
-
-          return {
-            ...state,
-            books: state.books.map((book) =>
-              book.title === bookTitle
-                ? { ...book, likedBy: [...likedBy] }
-                : book
-            ),
-          };
-        } else {
-          if (findBookTitle[0].likedBy) {
-            likedBy = findBookTitle[0].likedBy.filter((id) => id !== userId);
-          }
-
-          console.log("DisLiked books", likedBy);
-
-          console.log(
-            "Mapped new disliked book:",
-            state.books.map((book) =>
-              book.title === bookTitle
-                ? { ...book, likedBy: [...likedBy] }
-                : book
-            )
-          );
-          return {
-            ...state,
-            books: state.books.map((book) =>
-              book.title === bookTitle
-                ? { ...book, likedBy: [...likedBy] }
-                : book
-            ),
-          };
-        }
-      } else {
-        return { ...state };
-      }
-    });
-  },
-
-  borrowBookFunction: (bookTitle, userEmail) => {
-    console.log("BorrowBookFunction store");
-    console.log("The book borrowed is " + bookTitle + " by " + userEmail);
-
-    set((state) => {
-      const findBookTitle = state.books.find(
-        (book) => book.title === bookTitle
-      );
-
-      console.log("Findbooktitle", findBookTitle);
-      if (findBookTitle) {
-        if (findBookTitle.quantity > findBookTitle.borrowedBy.length) {
-          return {
-            ...state,
-            books: state.books.map((book) =>
-              book.title === bookTitle
-                ? {
-                    ...book,
-                    borrowedBy: [...book.borrowedBy, { user: userEmail }],
-                  }
-                : book
-            ),
-          };
         } else {
           return { ...state };
         }
+      });
+    }
+  },
+
+  borrowBookFunction: async (bookId, user, name, token, returnBy) => {
+    console.log("BorrowBookFunction store");
+    console.log("The book borrowed is " + bookId + " by " + user);
+
+    await axios.patch(
+      `http://localhost:3000/api/book/borrow/${bookId}`,
+      { user, name, returnBy },
+      { headers: { Authorization: token } }
+    );
+
+    set((state) => {
+      const findBookTitle = state.books.find((book) => book._id === bookId);
+
+      console.log("Findbooktitle", findBookTitle);
+      if (findBookTitle) {
+        // if (findBookTitle.quantity > findBookTitle.borrowedBy.length) {
+        return {
+          ...state,
+          books: state.books.map((book) =>
+            book._id === bookId
+              ? {
+                  ...book,
+                  borrowedBy: [
+                    ...book.borrowedBy,
+                    { user: user, name: name, returnedBy: returnBy },
+                  ],
+                }
+              : book
+          ),
+        };
       } else {
         return { ...state };
       }
