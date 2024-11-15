@@ -6,18 +6,30 @@ import bookStore from "../store/BookStore";
 import userStore from "../store/UserStore";
 import Chart from "react-apexcharts";
 import { useSnackbar } from "notistack";
+import { Skeleton } from "@mui/material";
 // import axios from "axios";
 
 function HomeDashboard() {
   const [loading, setLoading] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
   const { books, returnBookStore } = bookStore();
-  const { students } = userStore();
+  const { students, getAdminDashboard } = userStore();
+  // const [loading,setLoading]=false;
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    setLoading(false);
-  }, [loading]);
+    setLoading(true);
+    const getBookStudentFromStore = async () => {
+      try {
+        await getAdminDashboard(token);
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getBookStudentFromStore();
+  }, []);
 
   const cards = [
     {
@@ -40,41 +52,7 @@ function HomeDashboard() {
       }, 0),
       // total: 2,
     },
-    // {
-    //   title: "Remaining Books",
-    //   // total: 21,
-    //   total:
-    //     books.reduce((accumulator, book) => {
-    //       return accumulator + book.quantity;
-    //     }, 0) -
-    //     books.reduce((accumulator, book) => {
-    //       return accumulator + book.borrowedBy.length;
-    //     }, 0),
-    // },
   ];
-
-  // const bookStatus = [
-  //   {
-  //     id: "q121324i555",
-  //     title: "Title 1",
-  //     borrowedBy: "John Doe",
-  //   },
-  //   {
-  //     id: "rr21324i555",
-  //     title: "Title 2",
-  //     borrowedBy: "Jane Doe",
-  //   },
-  //   {
-  //     id: "qty121324i555",
-  //     title: "Title 3",
-  //     borrowedBy: "Clack Doe",
-  //   },
-  //   {
-  //     id: "q121324i555",
-  //     title: "Title 4",
-  //     borrowedBy: "Smith Doe",
-  //   },
-  // ];
 
   const tableVariants = {
     initial: {
@@ -185,18 +163,32 @@ function HomeDashboard() {
     <div className="py-12 px-8">
       <div className="flex flex-wrap w-full gap-5 justify-center mb-14">
         {cards.map((card) => (
-          <CardHome key={card.title} loading={loading} card={card} />
+          <CardHome key={card.title} card={card} />
         ))}
-        <div className="bg-slate-900 rounded-xl  py-4 h-40">
-          {" "}
-          <Chart
-            options={chartOptions}
-            // label={["1212", "12124"]}
 
-            series={series}
-            type="donut"
-          />
-        </div>
+        {!loading ? (
+          <div className="bg-slate-900 rounded-xl py-4  h-40">
+            <Chart
+              options={chartOptions}
+              // label={["1212", "12124"]}
+
+              series={series}
+              type="donut"
+            />
+          </div>
+        ) : (
+          <div className="bg-slate-900 rounded-xl px-4 basis-[22%] ">
+            <Skeleton
+              style={{
+                width: "100%",
+                height: "100%",
+                backgroundColor: " rgba(215, 215, 215,0.1)",
+              }}
+              variant="text"
+              animation="pulse"
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex mb-8  justify-between w-full">
@@ -213,6 +205,8 @@ function HomeDashboard() {
         >
           Recently borrowed book
         </motion.h1>
+        {/* {loading && ( */}
+        {/* )} */}
         <motion.form
           initial="hidden"
           viewport={{ once: true }}
@@ -254,43 +248,86 @@ function HomeDashboard() {
           </tr>
         </thead>
         <tbody className="">
-          {showBookBorrowed.map((book, index) =>
-            // book.borrowedBy.length &&
-            book.borrowedBy.map((borrow) => (
-              <motion.tr
-                key={book._id}
-                variants={tableVariants}
-                initial="initial"
-                whileInView={"animate"}
-                viewport={{
-                  once: true,
-                }}
-                custom={index}
-                className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
-              >
-                <th
-                  scope="row"
-                  className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
-                >
-                  {book._id}
-                </th>
-                <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                  {book.title}
-                </td>
-                <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                  {borrow.name}
-                </td>
-                <td className="px-6 py-4">
-                  <button
-                    onClick={() => returnBook(book._id, borrow.user)}
-                    className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
+          {loading
+            ? // <td>Loading</td>
+              [1, 2, 3].map((sk) => (
+                <tr key={sk}>
+                  <td>
+                    <Skeleton
+                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                      // width={200}
+                      variant="text"
+                      animation="pulse"
+                      height={35}
+                    />
+                  </td>
+                  <td>
+                    <Skeleton
+                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                      // width={200}
+                      variant="text"
+                      animation="pulse"
+                      height={35}
+                    />
+                  </td>
+                  <td>
+                    <Skeleton
+                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                      // width={200}
+                      variant="text"
+                      animation="pulse"
+                      height={35}
+                    />
+                  </td>
+                  <td>
+                    <Skeleton
+                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                      // width={200}
+                      variant="text"
+                      animation="pulse"
+                      height={35}
+                    />
+                  </td>
+                </tr>
+              ))
+            : showBookBorrowed.map((book, index) =>
+                // book.borrowedBy.length &&
+
+                book.borrowedBy.map((borrow) => (
+                  <motion.tr
+                    key={book._id}
+                    variants={tableVariants}
+                    initial="initial"
+                    whileInView={"animate"}
+                    viewport={{
+                      once: true,
+                    }}
+                    custom={index}
+                    className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
                   >
-                    Returned
-                  </button>
-                </td>
-              </motion.tr>
-            ))
-          )}
+                    <th
+                      scope="row"
+                      className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
+                    >
+                      {book._id}
+                    </th>
+                    <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                      {book.title}
+                    </td>
+                    <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                      {borrow.name}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => returnBook(book._id, borrow.user)}
+                        className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
+                      >
+                        Returned
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))
+              )}
         </tbody>
       </table>
     </div>

@@ -5,7 +5,7 @@ import BookAdmin from "../components/BookAdmin";
 import Modal from "react-modal";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
 import CancelIcon from "@mui/icons-material/Cancel";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSnackbar } from "notistack";
 // import axios from "axios";
 
@@ -17,6 +17,24 @@ type BookInputType = {
 
 function Books() {
   const { enqueueSnackbar } = useSnackbar();
+  const { getAllBookStore } = bookStore();
+  const { books, createBookStore } = bookStore();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const getBooksCall = async () => {
+      try {
+        await getAllBookStore();
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getBooksCall();
+  }, []);
+
   const bookVariants = {
     initial: {
       opacity: 0.3,
@@ -32,7 +50,6 @@ function Books() {
       },
     }),
   };
-  const { books, createBookStore } = bookStore();
 
   const [isOpenCreateBook, setIsOpenCreateBook] = useState(false);
   const [bookImg, setBookImg] = useState<File | undefined>();

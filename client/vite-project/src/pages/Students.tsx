@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import SearchIcon from "@mui/icons-material/Search";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "react-modal";
 import userStore from "../store/UserStore";
 import { useSnackbar } from "notistack";
@@ -13,6 +13,9 @@ type RegisterType = {
 
 function Students() {
   const token = localStorage.getItem("token");
+  // const [loading, setLoading] = useState(false);
+  const { addStudentStore, students, deleteStudentStore, getAllStudents } =
+    userStore();
   const { enqueueSnackbar } = useSnackbar();
 
   const [isOpenCreateStudent, setIsOpenCreateStudent] = useState(false);
@@ -21,7 +24,18 @@ function Students() {
     name: "",
   });
 
-  const { addStudentStore, students, deleteStudentStore } = userStore();
+  useEffect(() => {
+    // setLoading(true);
+    const getStudentCall = async () => {
+      try {
+        await getAllStudents(token);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getStudentCall();
+  }, []);
+
   const { books } = bookStore();
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {

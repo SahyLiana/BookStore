@@ -3,36 +3,15 @@ import AdminNav from "../components/AdminNav";
 // import HomeDashboard from "../components/HomeDashboard";
 import userStore from "../store/UserStore";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
-import bookStore from "../store/BookStore";
+// import { useEffect } from "react";
+// import bookStore from "../store/BookStore";
 
 function Dashboard() {
-  const { admin, getAllStudents } = userStore();
-  const { getAllBookStore } = bookStore();
-  const token = localStorage.getItem("token");
+  const { admin } = userStore();
+  // const { getAllBookStore } = bookStore();
+  // const token = localStorage.getItem("token");
 
   console.log(admin);
-
-  useEffect(() => {
-    const getBookFromStore = async () => {
-      try {
-        await getAllBookStore();
-      } catch (e) {
-        console.log(e);
-      }
-    };
-
-    const getStudentsFromStore = async () => {
-      try {
-        await getAllStudents(token);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getStudentsFromStore();
-
-    getBookFromStore();
-  }, []);
 
   return (
     <div className="bg-zinc-950 flex text-slate-100 h-screen overflow-y-auto ">

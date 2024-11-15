@@ -23,8 +23,8 @@ type State = {
 type Actions = {
   setAdmin: (admin: Omit<adminLoginType, "password">) => void;
   addStudentStore: (
-    studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">
-    // token: string | null
+    studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">,
+    token: string | null
   ) => void;
   getAllStudents: (token: string | null) => void;
   deleteStudentStore: (user: string, token: string | null) => void;
@@ -32,6 +32,7 @@ type Actions = {
   loginStudent: (student: Omit<Student, "_id" | "name">) => Promise<string>;
   logoutStudent: () => void;
   setStudent: (student: Omit<Student, "password">) => void;
+  getAdminDashboard: (token: string | null) => void;
 };
 
 const userStore = create<Actions & State>((set) => ({
@@ -56,15 +57,15 @@ const userStore = create<Actions & State>((set) => ({
   },
 
   async addStudentStore(
-    studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">
-    // token: string | null
+    studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">,
+    token: string | null
   ) {
     console.log("Inside addStudentStore", studentData);
 
     const registerStudentCall = await axios.post(
       "http://localhost:3000/api/student/",
-      studentData
-      // { headers: { Authorization: token } }
+      studentData,
+      { headers: { Authorization: token } }
     );
 
     console.log("RegisterCall", registerStudentCall.data);
@@ -82,6 +83,32 @@ const userStore = create<Actions & State>((set) => ({
     );
 
     console.log("All Students", getAllStudentCall.data);
+
+    set((state) => ({
+      ...state,
+      students: [...getAllStudentCall.data],
+    }));
+  },
+
+  async getAdminDashboard(token: string | null) {
+    const getAllStudentCall = await axios.get(
+      "http://localhost:3000/api/student/",
+      { headers: { Authorization: token } }
+    );
+
+    console.log("All Students", getAllStudentCall.data);
+    const getBookCall = await axios.get("http://localhost:3000/api/book");
+
+    // set((state) => ({
+    //   ...state,
+    //   books: [...getBookCall.data],
+    // }));
+
+    console.log("GetBookCall", getBookCall.data);
+    // const { getAllBookStore } = bookStore.getState();
+    const { setBooks } = bookStore.getState();
+
+    setBooks(getBookCall.data);
 
     set((state) => ({
       ...state,

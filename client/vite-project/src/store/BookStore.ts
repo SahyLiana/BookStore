@@ -37,7 +37,7 @@ type Actions = {
   createBookStore: (
     createBook: createBookType,
     bookImg: File | undefined,
-    token: string
+    token: string | null
   ) => void;
   getAllBookStore: () => void;
   deleteBookStore: (bookId: string, token: string | null) => void;

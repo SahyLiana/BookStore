@@ -5,10 +5,10 @@ type Props = {
     title: string;
     total: number;
   };
-  loading: boolean;
+  // loading: boolean;
 };
 
-function CardHome({ card, loading }: Props) {
+function CardHome({ card }: Props) {
   return (
     <div className="basis-[22%] bg-slate-900 h-40 py-8 px-5 rounded-xl">
       <h1 className="font-semibold text-lg mb-2 text-slate-200">
@@ -18,7 +18,7 @@ function CardHome({ card, loading }: Props) {
       <div className="flex gap-5 items-center">
         <p className="text-sm text-slate-600 font-bold">Total:</p>{" "}
         <span className="text-yellow-500 font-bold text-4xl">
-          {loading ? 0 : <CountUp duration={3} end={card.total} />}
+          <CountUp duration={3} end={card.total} />
         </span>
       </div>
     </div>
