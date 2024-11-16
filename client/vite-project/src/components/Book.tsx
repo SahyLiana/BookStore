@@ -24,6 +24,7 @@ type BookType = {
   title: string;
   img: string;
   featured: boolean;
+  borrowedBy?: { user: string; name?: string; returnedBy?: string }[];
   likedBy?: string[];
 };
 
@@ -107,6 +108,14 @@ function Book({ book }: Props) {
   };
 
   function openSingleBookModal(book: BookType) {
+    console.log(
+      "Return",
+      book.borrowedBy?.sort((a, b) => {
+        const dateA = a.returnedBy ? new Date(a.returnedBy) : new Date(0); // treat null as the earliest date
+        const dateB = b.returnedBy ? new Date(b.returnedBy) : new Date(0); // same for b
+        return +dateB - +dateA;
+      })
+    );
     setSingleBookModal(book);
     setIsOpenSingleBookModal(true);
   }
@@ -277,6 +286,27 @@ function Book({ book }: Props) {
                     : `${book.likedBy?.length} people liked this book`}
                 </p>
               </div>
+            )}
+
+            {book.borrowedBy?.sort((a, b) => {
+              const dateA = a.returnedBy ? new Date(a.returnedBy) : new Date(0); // treat null as the earliest date
+              const dateB = b.returnedBy ? new Date(b.returnedBy) : new Date(0); // same for b
+              return +dateB - +dateA;
+            })[0]?.returnedBy && (
+              <p className="text-sm mt-1">
+                <b>Returned by:</b>{" "}
+                {
+                  book.borrowedBy?.sort((a, b) => {
+                    const dateA = a.returnedBy
+                      ? new Date(a.returnedBy)
+                      : new Date(0); // treat null as the earliest date
+                    const dateB = b.returnedBy
+                      ? new Date(b.returnedBy)
+                      : new Date(0); // same for b
+                    return +dateA - +dateB;
+                  })[0]?.returnedBy
+                }
+              </p>
             )}
           </div>
         </div>

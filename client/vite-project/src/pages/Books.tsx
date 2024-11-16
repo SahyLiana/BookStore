@@ -19,17 +19,15 @@ function Books() {
   const { enqueueSnackbar } = useSnackbar();
   const { getAllBookStore } = bookStore();
   const { books, createBookStore } = bookStore();
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    // setLoading(true);
     const getBooksCall = async () => {
       try {
         await getAllBookStore();
       } catch (e) {
         console.log(e);
-      } finally {
-        setLoading(false);
       }
     };
     getBooksCall();

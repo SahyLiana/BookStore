@@ -147,7 +147,7 @@ function BookAdmin({ book }: Props) {
 
   return (
     <>
-      <div className="flex  hover:border-[1px] hover:border-black transition-all duration-200 cursor-pointer  relative group flex-col min-h-[23rem] max-h-[25rem] mb-3 border-[1px] border-slate-600 rounded-t-xl bg-slate-900  ">
+      <div className="flex  hover:border-[1px] hover:border-black transition-all duration-200 cursor-pointer  relative group flex-col min-h-[20rem] max-h-[25rem] mb-3 border-[1px] border-slate-600 rounded-t-xl bg-slate-900  ">
         {/**IMAGE CONTAINER */}
         {book.featured && (
           <p className="absolute top-1 z-[1] right-1 bg-yellow-600 rounded-lg px-2  py-[1px] text-[0.8rem]">
@@ -165,17 +165,16 @@ function BookAdmin({ book }: Props) {
 
         {/**BOOK DESC */}
         <div className="mt-5 py-2 px-5">
-          <p className="text-slate-500">Design Low Book</p>
+          {/* <p className="text-slate-500">Design Low Book</p> */}
           <p className="font-bold text-xl group-hover:t0000000000ext-yellow-500 transition-all duration-200 text-blue-600 mb-2">
             {book.title}
           </p>
 
-          {path === "borrowedbooks" && (
-            <p>
-              {book.borrowedBy ? book.borrowedBy.length : "0"} people borrowed
-              this book
-            </p>
-          )}
+          <p className="text-xs mb-1 text-slate-400">
+            Total: <b>{book.quantity}</b> | Borrowed:{" "}
+            <b>{book.borrowedBy?.length}</b>
+          </p>
+
           {path === "books" && (
             <div className="flex gap-2">
               <EditIcon

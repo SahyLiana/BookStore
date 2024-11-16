@@ -233,6 +233,35 @@ export class BookService {
     return borrowBook;
   }
 
+  async setDateService(
+    bookId: string,
+    body: { user: string; returnedBy?: string },
+  ) {
+    const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
+    if (!isValidBookId) {
+      throw new HttpException('Invalid Id', HttpStatus.BAD_REQUEST);
+    }
+
+    console.log('Inside likebookservice:', bookId, body);
+
+    const borrowBook = this.bookModel.findByIdAndUpdate(
+      { _id: bookId }, // Find the book by its ID
+      {
+        $set: {
+          'borrowedBy.$[elem].returnedBy': body.returnedBy, // Update the returnBy field for the matched user
+        },
+      },
+      {
+        new: true, // To return the updated document
+        arrayFilters: [
+          { 'elem.user': body.user }, // Filter for the user in the borrowedBy array
+        ],
+      },
+    );
+
+    return borrowBook;
+  }
+
   async returnBookService(bookId: string, user: string) {
     const isValidBookId = mongoose.Types.ObjectId.isValid(bookId);
     if (!isValidBookId) {

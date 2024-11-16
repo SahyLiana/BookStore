@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import CardHome from "../components/CardHome";
 import SearchIcon from "@mui/icons-material/Search";
 import { motion } from "framer-motion";
@@ -8,12 +8,22 @@ import Chart from "react-apexcharts";
 import { useSnackbar } from "notistack";
 import { Skeleton } from "@mui/material";
 // import axios from "axios";
+// type BookType = {
+//   _id: string;
+//   title: string;
+//   img: string;
+//   featured: boolean;
+//   likedBy?: string[];
+//   borrowedBy: { user: string; name?: string; returnedBy?: string }[];
+//   quantity: number;
+// };
 
 function HomeDashboard() {
   const [loading, setLoading] = useState(true);
   const { enqueueSnackbar } = useSnackbar();
-  const { books, returnBookStore } = bookStore();
+  const { books, returnBookStore, setDateStore } = bookStore();
   const { students, getAdminDashboard } = userStore();
+  const [date, setDate] = useState({ bookId: "", date: "", user: "" });
   // const [loading,setLoading]=false;
   const token = localStorage.getItem("token");
 
@@ -140,6 +150,42 @@ function HomeDashboard() {
       }, 0),
   ];
 
+  const submitDate = async (
+    e: React.FormEvent<HTMLFormElement>,
+    bookId: string,
+    name: string | undefined,
+    user: string,
+    date: { bookId: string; date: string; user: string }
+  ) => {
+    e.preventDefault();
+
+    if (name && date.date && date.bookId === bookId) {
+      console.log("Set date", bookId, name, user, date);
+      try {
+        await setDateStore(
+          bookId,
+          { user, returnedBy: date.date },
+          localStorage.getItem("token")
+        );
+        enqueueSnackbar("Set successfully", {
+          variant: "success",
+          anchorOrigin: { horizontal: "right", vertical: "bottom" },
+        });
+      } catch (e) {
+        console.log(e);
+        enqueueSnackbar("Something went wrong", {
+          variant: "error",
+          anchorOrigin: { horizontal: "right", vertical: "bottom" },
+        });
+      }
+    } else {
+      enqueueSnackbar("Something went wrong", {
+        variant: "error",
+        anchorOrigin: { horizontal: "right", vertical: "bottom" },
+      });
+    }
+  };
+
   const returnBook = async (bookId: string, user: string) => {
     console.log(token);
     try {
@@ -157,7 +203,29 @@ function HomeDashboard() {
     }
   };
 
-  const showBookBorrowed = books.filter((book) => book.borrowedBy && book);
+  const BookBorrowed = books.filter(
+    (book) => book.borrowedBy && book.borrowedBy.length > 0
+  );
+
+  const showBookBorrowed = [];
+
+  for (let i = 0; i < BookBorrowed.length; i++) {
+    for (let j = 0; j < BookBorrowed[i].borrowedBy.length; j++) {
+      if (!BookBorrowed[i].borrowedBy[j].returnedBy?.length) {
+        showBookBorrowed.push({
+          ...BookBorrowed[i],
+          borrowedBy: [
+            {
+              ...BookBorrowed[i].borrowedBy[j],
+              returnedBy: BookBorrowed[i].borrowedBy[j].returnedBy,
+            },
+          ],
+        });
+      }
+    }
+  }
+
+  console.log("showBookBorrowed", showBookBorrowed, BookBorrowed);
 
   return (
     <div className="py-12 px-8">
@@ -317,13 +385,47 @@ function HomeDashboard() {
                     <td className="px-6 py-4 text-slate-400 font-bold text-md">
                       {borrow.name}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 flex">
                       <button
                         onClick={() => returnBook(book._id, borrow.user)}
                         className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
                       >
                         Returned
                       </button>
+
+                      <form
+                        onSubmit={(e) =>
+                          submitDate(
+                            e,
+                            book._id,
+                            borrow.name,
+                            borrow.user,
+                            date
+                          )
+                        }
+                        className="mx-2"
+                      >
+                        <label className="text-white">Returned by:</label>
+                        <input
+                          type="date"
+                          className="ml-2"
+                          onChange={(e) =>
+                            setDate((prev) => ({
+                              ...prev,
+                              bookId: book._id,
+                              date: e.target.value,
+                              user: borrow.user,
+                            }))
+                          }
+                        />
+                        {date.bookId === book._id &&
+                          date.date &&
+                          date.user === borrow?.user && (
+                            <button className="bg-green-600 mx-2 px-2 text-sm text-white ">
+                              Set
+                            </button>
+                          )}
+                      </form>
                     </td>
                   </motion.tr>
                 ))

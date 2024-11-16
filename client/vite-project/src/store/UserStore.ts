@@ -24,7 +24,7 @@ type Actions = {
   setAdmin: (admin: Omit<adminLoginType, "password">) => void;
   addStudentStore: (
     studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">,
-    token: string | null
+    token?: string | null
   ) => void;
   getAllStudents: (token: string | null) => void;
   deleteStudentStore: (user: string, token: string | null) => void;
@@ -58,7 +58,7 @@ const userStore = create<Actions & State>((set) => ({
 
   async addStudentStore(
     studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">,
-    token: string | null
+    token?: string | null
   ) {
     console.log("Inside addStudentStore", studentData);
 

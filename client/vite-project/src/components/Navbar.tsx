@@ -11,6 +11,7 @@ import PersonIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import ChatIcon from "@mui/icons-material/Chat";
+import bookStore from "../store/BookStore";
 // import PersonIcon from "@mui/icons-material/Person";
 
 type Props = {
@@ -28,6 +29,7 @@ Modal.setAppElement("#root");
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Navbar({ activeSection }: Props) {
   const { enqueueSnackbar } = useSnackbar();
+  const { getAllBookStore } = bookStore();
   const links = ["Home", "Categories", "Books", "My Books", "Featured"];
 
   const { addStudentStore, loginStudent, loggedStudent, logoutStudent } =
@@ -91,6 +93,7 @@ function Navbar({ activeSection }: Props) {
         variant: "success",
         anchorOrigin: { horizontal: "right", vertical: "bottom" },
       });
+      await getAllBookStore();
 
       console.log("Tokenstd is Bearer", tokenstd);
       localStorage.setItem("tokenstd", `Bearer ${tokenstd}`);
@@ -107,10 +110,15 @@ function Navbar({ activeSection }: Props) {
 
   console.log("Logged student is:", loggedStudent);
 
-  const studentLogout = () => {
+  const studentLogout = async () => {
     localStorage.removeItem("tokenstd");
     logoutStudent();
     closeModal();
+    try {
+      await getAllBookStore();
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {

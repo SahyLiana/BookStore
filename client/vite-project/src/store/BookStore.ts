@@ -48,6 +48,11 @@ type Actions = {
   ) => void;
   setBooks: (newBooks: BookType[]) => void;
   returnBookStore: (bookId: string, user: string, token: string | null) => void;
+  setDateStore: (
+    bookId: string,
+    body: { user: string; returnedBy?: string },
+    token: string | null
+  ) => void;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -143,6 +148,38 @@ const bookStore = create<State & Actions>((set) => ({
         return { ...state };
       }
     });
+  },
+
+  setDateStore: async (
+    bookId: string,
+    body: { user: string; returnedBy?: string },
+    token: string | null
+  ) => {
+    console.log("Inside setDateStore", bookId, body);
+
+    const setDateAPI = await axios.patch(
+      `http://localhost:3000/api/book/date/${bookId}`,
+      body,
+      { headers: { Authorization: token } }
+    );
+
+    console.log("setDateAPI", setDateAPI.data);
+
+    set((state) => ({
+      ...state,
+      books: state.books.map((book) =>
+        book._id === bookId
+          ? {
+              ...book,
+              borrowedBy: book.borrowedBy.map((borrow) =>
+                borrow.user === body.user
+                  ? { ...borrow, returnedBy: body.returnedBy }
+                  : borrow
+              ),
+            }
+          : book
+      ),
+    }));
   },
 
   createBookStore: async (

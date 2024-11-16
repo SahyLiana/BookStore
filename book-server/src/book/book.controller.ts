@@ -129,4 +129,13 @@ export class BookController {
   returnBook(@Param('bookId') bookId: string, @Param('user') user: string) {
     return this.bookService.returnBookService(bookId, user);
   }
+
+  @Patch('date/:bookId')
+  @UseGuards(JwtAuthGuard)
+  setDate(
+    @Param('bookId') bookId: string,
+    @Body() body: { user: string; returnedBy?: string },
+  ) {
+    return this.bookService.setDateService(bookId, body);
+  }
 }

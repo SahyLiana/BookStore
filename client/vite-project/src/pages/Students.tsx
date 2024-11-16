@@ -14,7 +14,7 @@ type RegisterType = {
 function Students() {
   const token = localStorage.getItem("token");
   // const [loading, setLoading] = useState(false);
-  const { addStudentStore, students, deleteStudentStore, getAllStudents } =
+  const { addStudentStore, students, deleteStudentStore, getAdminDashboard } =
     userStore();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -28,7 +28,7 @@ function Students() {
     // setLoading(true);
     const getStudentCall = async () => {
       try {
-        await getAllStudents(token);
+        await getAdminDashboard(token);
       } catch (e) {
         console.log(e);
       }
