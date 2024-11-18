@@ -161,7 +161,7 @@ function Books() {
           isOpen={isOpenCreateBook}
           onRequestClose={closeModal}
           overlayClassName="Overlay"
-          className="top-[50%] fixed left-[50%] z-[100] bg-white right-auto w-1/3 overflow-y-auto  border-[1px] p-4 rounded-lg shadow-lg bottom-auto m-r-[-50%] translate-x-[-50%] translate-y-[-50%] h-[70%]"
+          className="top-[50%] fixed left-[50%] z-40 bg-white right-auto w-1/3 overflow-y-auto  border-[1px] p-4 rounded-lg shadow-lg bottom-auto m-r-[-50%] translate-x-[-50%] translate-y-[-50%] h-[70%]"
         >
           <h1 className="text-blue-700 text-3xl mb-2 font-bold">Create book</h1>
           <hr className="mb-5" />

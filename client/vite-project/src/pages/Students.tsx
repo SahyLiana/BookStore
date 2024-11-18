@@ -174,50 +174,58 @@ function Students() {
           </tr>
         </thead>
         <tbody className="">
-          {students.map((student, index) => (
-            <motion.tr
-              key={student._id}
-              variants={tableVariants}
-              initial="initial"
-              whileInView={"animate"}
-              custom={index}
-              viewport={{
-                once: true,
-              }}
-              // custom={index}
-              className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
-            >
-              <th
-                scope="row"
-                className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
+          {students ? (
+            students.map((student, index) => (
+              <motion.tr
+                key={student._id}
+                variants={tableVariants}
+                initial="initial"
+                whileInView={"animate"}
+                custom={index}
+                viewport={{
+                  once: true,
+                }}
+                // custom={index}
+                className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
               >
-                {student._id}
-              </th>
-              <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                {student.name}
-              </td>
-              <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                {student.email}
-              </td>
-              <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                {
-                  books.filter((book) =>
-                    book.borrowedBy.find(
-                      (borrow) => borrow.user === student.email
-                    )
-                  ).length
-                }
-              </td>
-              <td className="px-6 py-4">
-                <button
-                  onClick={() => deleteStudent(student.email)}
-                  className="bg-red-900 hover:bg-red-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
+                <th
+                  scope="row"
+                  className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
                 >
-                  Delete
-                </button>
+                  {student._id}
+                </th>
+                <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                  {student.name}
+                </td>
+                <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                  {student.email}
+                </td>
+                <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                  {
+                    books.filter((book) =>
+                      book.borrowedBy.find(
+                        (borrow) => borrow.user === student.email
+                      )
+                    ).length
+                  }
+                </td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => deleteStudent(student.email)}
+                    className="bg-red-900 hover:bg-red-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </motion.tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={5} className="text-center text-5xl py-3">
+                No items
               </td>
-            </motion.tr>
-          ))}
+            </tr>
+          )}
         </tbody>
       </table>
 

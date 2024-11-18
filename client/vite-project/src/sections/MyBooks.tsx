@@ -149,9 +149,9 @@ function MyBooks() {
         }}
         className="flex flex-wrap gap-1 max-h-[800px] overflow-y-auto"
       >
-        {emptyBook ? (
-          <h1 className="text-5xl text-slate-500 text-center  w-full">
-            Book not found...
+        {emptyBook || booksView.length === 0 ? (
+          <h1 className="text-5xl text-slate-500 overflow-y-hidden text-center  w-full">
+            No items...
           </h1>
         ) : bookSearched.length > 0 ? (
           bookSearched.map((book) => <Book key={book.title} book={book} />)

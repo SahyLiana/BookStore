@@ -1,15 +1,18 @@
 import { Outlet } from "react-router-dom";
 import AdminNav from "../components/AdminNav";
-// import HomeDashboard from "../components/HomeDashboard";
+
 import userStore from "../store/UserStore";
 import { motion } from "framer-motion";
-// import { useEffect } from "react";
-// import bookStore from "../store/BookStore";
+import { useState } from "react";
+import OpenChat from "../components/OpenChat";
+import ChatIcon from "@mui/icons-material/Chat";
 
 function Dashboard() {
   const { admin } = userStore();
   // const { getAllBookStore } = bookStore();
   // const token = localStorage.getItem("token");
+
+  const [openChat, setOpenChat] = useState(false);
 
   console.log(admin);
 
@@ -21,7 +24,7 @@ function Dashboard() {
       {/* <div className="w-full"> */}
       {/* <HomeDashboard /> */}
       <div className="text-slate-100 py-14   w-full">
-        <div className="flex overflow-x-hidden items-center px-10  pb-10  border-b border-blue-400 justify-between">
+        <div className="flex overflow-x-hidden items-center relative px-10  pb-10  border-b border-blue-400 justify-between">
           <motion.h1
             initial="hidden"
             viewport={{ once: true }}
@@ -44,12 +47,16 @@ function Dashboard() {
               hidden: { opacity: 0 },
               visible: { opacity: 1 },
             }}
-            className="bg-blue-600 font-bold  py-2 rounded-md hover:bg-blue-800 duration-200 text-yellow-100 transition-all px-5"
+            className={`${openChat ? "bg-red-600 hover:bg-red-700" : "bg-blue-600"}  font-bold  py-2 rounded-md hover:bg-blue-800 duration-200 text-yellow-100 transition-all px-5`}
+            onClick={() => setOpenChat((prev) => !prev)}
           >
-            Open Chat
+            {openChat ? "Close Chat" : "Open Chat"} <ChatIcon />
           </motion.button>
+
           {/* </div> */}
+          {openChat && <OpenChat />}
         </div>
+
         <Outlet />
       </div>
     </div>

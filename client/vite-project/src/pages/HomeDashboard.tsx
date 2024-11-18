@@ -316,120 +316,122 @@ function HomeDashboard() {
           </tr>
         </thead>
         <tbody className="">
-          {loading
-            ? // <td>Loading</td>
-              [1, 2, 3].map((sk) => (
-                <tr key={sk}>
-                  <td>
-                    <Skeleton
-                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
-                      // width={200}
-                      variant="text"
-                      animation="pulse"
-                      height={35}
-                    />
-                  </td>
-                  <td>
-                    <Skeleton
-                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
-                      // width={200}
-                      variant="text"
-                      animation="pulse"
-                      height={35}
-                    />
-                  </td>
-                  <td>
-                    <Skeleton
-                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
-                      // width={200}
-                      variant="text"
-                      animation="pulse"
-                      height={35}
-                    />
-                  </td>
-                  <td>
-                    <Skeleton
-                      style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
-                      // width={200}
-                      variant="text"
-                      animation="pulse"
-                      height={35}
-                    />
-                  </td>
-                </tr>
-              ))
-            : showBookBorrowed.map((book, index) =>
-                // book.borrowedBy.length &&
+          {loading ? (
+            // <td>Loading</td>
+            [1, 2, 3].map((sk) => (
+              <tr key={sk}>
+                <td>
+                  <Skeleton
+                    style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                    // width={200}
+                    variant="text"
+                    animation="pulse"
+                    height={35}
+                  />
+                </td>
+                <td>
+                  <Skeleton
+                    style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                    // width={200}
+                    variant="text"
+                    animation="pulse"
+                    height={35}
+                  />
+                </td>
+                <td>
+                  <Skeleton
+                    style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                    // width={200}
+                    variant="text"
+                    animation="pulse"
+                    height={35}
+                  />
+                </td>
+                <td>
+                  <Skeleton
+                    style={{ backgroundColor: " rgba(50, 60, 50,0.4)" }}
+                    // width={200}
+                    variant="text"
+                    animation="pulse"
+                    height={35}
+                  />
+                </td>
+              </tr>
+            ))
+          ) : showBookBorrowed.length ? (
+            showBookBorrowed.map((book, index) =>
+              // book.borrowedBy.length &&
 
-                book.borrowedBy.map((borrow) => (
-                  <motion.tr
-                    key={book._id}
-                    variants={tableVariants}
-                    initial="initial"
-                    whileInView={"animate"}
-                    viewport={{
-                      once: true,
-                    }}
-                    custom={index}
-                    className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
+              book.borrowedBy.map((borrow) => (
+                <motion.tr
+                  key={book._id}
+                  variants={tableVariants}
+                  initial="initial"
+                  whileInView={"animate"}
+                  viewport={{
+                    once: true,
+                  }}
+                  custom={index}
+                  className="odd:bg-slate-800 odd:dark:bg-slate-900 even:bg-slate-950 even:dark:bg-gray-900  hover:bg-slate-700 dark:border-gray-700"
+                >
+                  <th
+                    scope="row"
+                    className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
                   >
-                    <th
-                      scope="row"
-                      className="px-6 py-4 font-medium text-slate-200 whitespace-nowrap dark:text-white"
+                    {book._id}
+                  </th>
+                  <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                    {book.title}
+                  </td>
+                  <td className="px-6 py-4 text-slate-400 font-bold text-md">
+                    {borrow.name}
+                  </td>
+                  <td className="px-6 py-4 flex">
+                    <button
+                      onClick={() => returnBook(book._id, borrow.user)}
+                      className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
                     >
-                      {book._id}
-                    </th>
-                    <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                      {book.title}
-                    </td>
-                    <td className="px-6 py-4 text-slate-400 font-bold text-md">
-                      {borrow.name}
-                    </td>
-                    <td className="px-6 py-4 flex">
-                      <button
-                        onClick={() => returnBook(book._id, borrow.user)}
-                        className="bg-blue-900 hover:bg-blue-950 duration-200 text-white px-2 py-1 rounded-md text-sm"
-                      >
-                        Returned
-                      </button>
+                      Returned
+                    </button>
 
-                      <form
-                        onSubmit={(e) =>
-                          submitDate(
-                            e,
-                            book._id,
-                            borrow.name,
-                            borrow.user,
-                            date
-                          )
+                    <form
+                      onSubmit={(e) =>
+                        submitDate(e, book._id, borrow.name, borrow.user, date)
+                      }
+                      className="mx-2"
+                    >
+                      <label className="text-white">Returned by:</label>
+                      <input
+                        type="date"
+                        className="ml-2"
+                        onChange={(e) =>
+                          setDate((prev) => ({
+                            ...prev,
+                            bookId: book._id,
+                            date: e.target.value,
+                            user: borrow.user,
+                          }))
                         }
-                        className="mx-2"
-                      >
-                        <label className="text-white">Returned by:</label>
-                        <input
-                          type="date"
-                          className="ml-2"
-                          onChange={(e) =>
-                            setDate((prev) => ({
-                              ...prev,
-                              bookId: book._id,
-                              date: e.target.value,
-                              user: borrow.user,
-                            }))
-                          }
-                        />
-                        {date.bookId === book._id &&
-                          date.date &&
-                          date.user === borrow?.user && (
-                            <button className="bg-green-600 mx-2 px-2 text-sm text-white ">
-                              Set
-                            </button>
-                          )}
-                      </form>
-                    </td>
-                  </motion.tr>
-                ))
-              )}
+                      />
+                      {date.bookId === book._id &&
+                        date.date &&
+                        date.user === borrow?.user && (
+                          <button className="bg-green-600 mx-2 px-2 text-sm text-white ">
+                            Set
+                          </button>
+                        )}
+                    </form>
+                  </td>
+                </motion.tr>
+              ))
+            )
+          ) : (
+            <tr>
+              <td colSpan={4} className="text-center text-5xl py-3">
+                No items
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
