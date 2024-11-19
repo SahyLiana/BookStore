@@ -3,60 +3,60 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Message from "./Message";
 
-type StudentConversationType = {
-  _id: string;
-  members: { name: string; userId: string }[];
-  //   name: string;
-  //   userId: string;
-};
-
 type MessageType = {
-  conversation_id: string;
+  // conversation_id: string;?
   sender: { user_id: string; user: string };
   message: string;
   timestamp: string;
 };
+type StudentConversationType = {
+  _id: string;
+  members: { name: string; userId: string }[];
+  messages?: MessageType[];
+  //   name: string;
+  //   userId: string;
+};
 
 function OpenChat() {
-  const messages: MessageType[] = [
-    {
-      conversation_id: "2",
-      sender: {
-        user_id: "13",
-        user: "Tojo",
-      },
-      message: "Test",
-      timestamp: "just now",
-    },
+  // const messages: MessageType[] = [
+  //   {
+  //     // conversation_id: "2",
+  //     sender: {
+  //       user_id: "13",
+  //       user: "Tojo",
+  //     },
+  //     message: "Test",
+  //     timestamp: "just now",
+  //   },
 
-    {
-      conversation_id: "1",
-      sender: {
-        user_id: "1a",
-        user: "admin",
-      },
-      message: "Hello,How are you?",
-      timestamp: "5mn ago",
-    },
-    {
-      conversation_id: "1",
-      sender: {
-        user_id: "12",
-        user: "Sahy",
-      },
-      message: "I am fine sir, and you?",
-      timestamp: "3mn ago",
-    },
-    {
-      conversation_id: "1",
-      sender: {
-        user_id: "1a",
-        user: "admin",
-      },
-      message: "I am fine bro.",
-      timestamp: "just now",
-    },
-  ];
+  //   {
+  //     // conversation_id: "1",
+  //     sender: {
+  //       user_id: "1a",
+  //       user: "admin",
+  //     },
+  //     message: "Hello,How are you?",
+  //     timestamp: "5mn ago",
+  //   },
+  //   {
+  //     // conversation_id: "1",
+  //     sender: {
+  //       user_id: "12",
+  //       user: "Sahy",
+  //     },
+  //     message: "I am fine sir, and you?",
+  //     timestamp: "3mn ago",
+  //   },
+  //   {
+  //     // conversation_id: "1",
+  //     sender: {
+  //       user_id: "1a",
+  //       user: "admin",
+  //     },
+  //     message: "I am fine bro.",
+  //     timestamp: "just now",
+  //   },
+  // ];
 
   const studentsChats: StudentConversationType[] = [
     {
@@ -65,12 +65,48 @@ function OpenChat() {
         { name: "admin", userId: "1a" },
         { name: "Sahy", userId: "12" },
       ],
+      messages: [
+        {
+          sender: {
+            user_id: "1a",
+            user: "admin",
+          },
+          message: "Hello,How are you?",
+          timestamp: "5mn ago",
+        },
+        {
+          sender: {
+            user_id: "12",
+            user: "Sahy",
+          },
+          message: "I am fine sir, and you?",
+          timestamp: "3mn ago",
+        },
+        {
+          sender: {
+            user_id: "1a",
+            user: "admin",
+          },
+          message: "I am fine bro.",
+          timestamp: "just now",
+        },
+      ],
     },
     {
       _id: "2",
       members: [
         { name: "admin", userId: "1a" },
         { name: "Tojo", userId: "13" },
+      ],
+      messages: [
+        {
+          sender: {
+            user_id: "13",
+            user: "Tojo",
+          },
+          message: "Test",
+          timestamp: "just now",
+        },
       ],
     },
     {
@@ -104,27 +140,24 @@ function OpenChat() {
   ];
 
   const [selectedStudent, setSelectedStudent] =
-    useState<StudentConversationType>({
-      _id: "",
-      members: [],
-    });
+    useState<StudentConversationType | null>();
 
-  const [conversationMessages, setConversationMessages] = useState<
-    MessageType[]
-  >([]);
+  // const [conversationMessages, setConversationMessages] = useState<
+  //   MessageType[]
+  // >([]);
 
   const openChatConversation = (
     studentConversation: StudentConversationType
   ) => {
-    setSelectedStudent((prev) => ({ ...prev, ...studentConversation }));
-    const myMessages = messages.filter(
-      (message) => message.conversation_id === studentConversation._id
-    );
+    setSelectedStudent(() => ({ ...studentConversation }));
+    // const myMessages = messages.filter(
+    //   (message) => message.conversation_id === studentConversation._id
+    // );
 
-    setConversationMessages(myMessages);
+    // setConversationMessages(myMessages);
   };
 
-  console.log("MyMessages", conversationMessages);
+  console.log("MyMessages", selectedStudent);
 
   return (
     <motion.div
@@ -158,17 +191,17 @@ function OpenChat() {
                 style={{
                   backgroundColor:
                     student.members[1]?.name ===
-                    selectedStudent.members[1]?.name
+                    selectedStudent?.members[1]?.name
                       ? "rgba(214, 214, 212,0.1)"
                       : "",
                   color:
                     student.members[1]?.name ===
-                    selectedStudent.members[1]?.name
+                    selectedStudent?.members[1]?.name
                       ? "rgb(245, 219, 6)"
                       : "",
                   fontSize:
                     student.members[1]?.name ===
-                    selectedStudent.members[1]?.name
+                    selectedStudent?.members[1]?.name
                       ? "1.05rem"
                       : "",
                 }}
@@ -182,28 +215,25 @@ function OpenChat() {
         {/**CHAT CONTAINER */}
         <div className="w-[80%] bg-red  bg-slate-900 flex flex-col">
           <div className="flex h-[70%] overflow-y-auto px-4 py-8 gap-8 flex-col">
-            {conversationMessages.length > 0 ? (
-              conversationMessages.map((conversation) => (
-                <Message
-                  conversation={conversation}
-                  selectedStudentChat={selectedStudent}
-                />
-              ))
+            {selectedStudent ? (
+              <Message chats={selectedStudent} />
             ) : (
               <h1 className="text-slate-400 text-center text-3xl">
-                No conversation yet...
+                Select a conversation...
               </h1>
             )}
           </div>
-          <form className="my-auto bg-slate-900 gap-2 justify-center  w-[100%] h-[40%] px-5 items-center flex py-2">
-            <textarea
-              className="min-w-[400px] text-black h-[80%] bg-slate-200 px-3 rounded-xl  "
-              placeholder="Enter message..."
-            />
-            <button className="bg-green-600 pb-1 text-sm px-3  rounded-md ">
-              <SendIcon style={{ fontSize: "1.1rem" }} />
-            </button>
-          </form>
+          {selectedStudent && (
+            <form className="my-auto bg-slate-900 gap-2 justify-center  w-[100%] h-[40%] px-5 items-center flex py-2">
+              <textarea
+                className="min-w-[400px] text-black h-[80%] bg-slate-200 px-3 rounded-xl  "
+                placeholder="Enter message..."
+              />
+              <button className="bg-green-600 pb-1 text-sm px-3  rounded-md ">
+                <SendIcon style={{ fontSize: "1.1rem" }} />
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </motion.div>
