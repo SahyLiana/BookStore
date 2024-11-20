@@ -4,20 +4,6 @@ import React, { useState } from "react";
 import Message from "./Message";
 import userStore from "../store/UserStore";
 
-// type MessageType = {
-//   // conversation_id: string;?
-//   sender: { user_id: string; user: string };
-//   message: string;
-//   timestamp: string;
-// };
-// type StudentConversationType = {
-//   _id: string;
-//   members: { name: string; userId: string }[];
-//   messages?: MessageType[];
-//   //   name: string;
-//   //   userId: string;
-// };
-
 type Student = {
   _id: string;
   name: string;
@@ -65,7 +51,7 @@ function OpenChat() {
   //   },
   // ];
 
-  const { students, admin, submitMessageStore } = userStore();
+  const { students, admin, submitMessageStore, conversation } = userStore();
   // const studentsChats: StudentConversationType[] = [
   //   {
   //     _id: "1",
@@ -171,15 +157,17 @@ function OpenChat() {
       "My message is",
       myMessage,
       // selectedStudent?.name,
+      conversation,
       selectedStudent?._id,
       admin._id,
       admin.username,
       new Date()
     );
     try {
-      if (selectedStudent?._id) {
+      if (conversation) {
         await submitMessageStore(
-          selectedStudent._id,
+          // selectedStudent._id,
+          conversation,
           myMessage,
           admin._id,
           admin.username,
@@ -202,16 +190,16 @@ function OpenChat() {
         hidden: { opacity: 0, x: 20 },
         visible: { opacity: 1, x: 1 },
       }}
-      className={`text-white z-[2]  fixed top-[25%] overflow-y-hidden right-0 h-[75%] w-[50%] bg-slate-950 border-[1px] border-blue-400 rounded-xl py-5 `}
+      className={`text-white z-[2] w-[50%]  fixed top-[25%] overflow-y-hidden right-2 h-[75%]  bg-slate-950 flex flex-col border-[1px] border-blue-400 rounded-xl  `}
     >
-      <div className="w-full pb-5 border-slate-600 border-b h-auto">
+      {/* <div className="w-full py-5 border-slate-600 border-b h-auto">
         <h1 className="text-center text-xl text-blue-800 font-semibold ">
           LIBRARIA CHATS
         </h1>
-      </div>
+      </div> */}
 
       {/**CONTAINER */}
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-[100%]">
         {/**STUDENTS CONTAINER */}
         <div className="w-[30%] overflow-y-auto py-4 px-2 border-r-2 border-r-blue-600   bg-slate-900 ">
           <h2 className="text-xl mb-3">My Chats</h2>
@@ -258,7 +246,7 @@ function OpenChat() {
               className="my-auto bg-slate-900 gap-2 justify-center  w-[100%] h-[40%] px-5 items-center flex py-2"
             >
               <textarea
-                className="min-w-[400px] text-black h-[80%] bg-slate-200 px-3 rounded-xl  "
+                className="min-w-[400px] focus:outline-none text-black  h-[80%] bg-slate-200 px-3 rounded-xl  "
                 placeholder="Enter message..."
                 required
                 onChange={(e) => setMyMessage(e.target.value)}

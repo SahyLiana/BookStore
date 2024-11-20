@@ -59,7 +59,8 @@ type Actions = {
   getAdminDashboard: (token: string | null) => void;
   setConversationStore: (conversation: Conversation) => void;
   submitMessageStore: (
-    stdId: string,
+    // stdId: string,
+    conversation: Conversation,
     message: string,
     senderId: string,
     senderName: string,
@@ -82,15 +83,16 @@ const userStore = create<Actions & State>((set) => ({
   },
 
   async submitMessageStore(
-    stdId: string,
+    // stdId: string,
+    conversation: Conversation,
     message: string,
     senderId: string,
     senderName: string,
     timestamp: Date
   ) {
-    console.log("submitMessageStore", stdId, message, timestamp);
+    console.log("submitMessageStore", message, timestamp);
     const submitMsgCall = await axios.patch(
-      `http://localhost:3000/api/conversation/${stdId}`,
+      `http://localhost:3000/api/conversation/${conversation._id}`,
       { senderId, senderName, message, timestamp }
     );
     console.log("submitMessageData", submitMsgCall.data);

@@ -46,17 +46,24 @@ export class ConversationService {
     return findConversation;
   }
 
-  async postMessageService(stdId: string, message: MessageDto) {
+  async postMessageService(
+    // stdId: string,
+    conversationId: string,
+    message: MessageDto,
+  ) {
     console.log('PostMessageService', message);
 
-    const isValid = mongoose.Types.ObjectId.isValid(stdId);
+    const isValid = mongoose.Types.ObjectId.isValid(conversationId);
 
     if (!isValid) {
       throw new HttpException('Invalid id', HttpStatus.BAD_REQUEST);
     }
 
+    // const findConversation = await this.conversationModel.findOne({
+    //   'members.userId': { $in: [stdId] },
+    // });
     const findConversation = await this.conversationModel.findOne({
-      'members.userId': { $in: [stdId] },
+      _id: conversationId,
     });
 
     if (!findConversation) {

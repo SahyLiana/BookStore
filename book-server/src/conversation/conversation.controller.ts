@@ -23,9 +23,17 @@ export class ConversationController {
     return this.conversationService.getConversationService(stdId, stdname);
   }
 
-  @Patch(':studentId')
+  @Patch(':conversationId')
   @UsePipes(new ValidationPipe())
-  postMessage(@Param('studentId') stdId: string, @Body() message: MessageDto) {
-    return this.conversationService.postMessageService(stdId, message);
+  postMessage(
+    // @Param('studentId') stdId: string,
+    @Param('conversationId') conversationId: string,
+    @Body() message: MessageDto,
+  ) {
+    return this.conversationService.postMessageService(
+      // stdId,
+      conversationId,
+      message,
+    );
   }
 }

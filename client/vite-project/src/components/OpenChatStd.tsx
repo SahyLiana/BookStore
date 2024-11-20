@@ -1,31 +1,41 @@
 import SendIcon from "@mui/icons-material/Send";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Message from "./Message";
 import userStore from "../store/UserStore";
+import axios from "axios";
 
-// type MessageType = {
-//   // conversation_id: string;?
-//   sender: { user_id: string; user: string };
-//   message: string;
-//   timestamp: string;
-// };
-// type StudentConversationType = {
+// type Student = {
 //   _id: string;
-//   members: { name: string; userId: string }[];
-//   messages?: MessageType[];
-//   //   name: string;
-//   //   userId: string;
+//   name: string;
+//   email: string;
 // };
-
-type Student = {
-  _id: string;
-  name: string;
-  email: string;
-};
 
 function OpenChatStd() {
-  const { user, submitMessageStore } = userStore();
+  const { user, submitMessageStore, setConversationStore, conversation } =
+    userStore();
+
+  useEffect(() => {
+    console.log("Selected student", user);
+
+    const getConversation = async () => {
+      try {
+        const conversationCall = await axios.get(
+          `http://localhost:3000/api/conversation/${user?._id}/${user?.name}`
+        );
+
+        console.log("conversationCall", conversationCall.data);
+        // setConversation(conversationCall.data);
+        setConversationStore({
+          _id: conversationCall.data._id,
+          ...conversationCall.data,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getConversation();
+  }, [user?._id]);
 
   //   const [selectedStudent, setSelectedStudent] = useState<Student | null>();
 
@@ -36,34 +46,34 @@ function OpenChatStd() {
 
   const [myMessage, setMyMessage] = useState("");
 
-  //   const submitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-  //     e.preventDefault();
-  //     console.log(
-  //       "My message is",
-  //       myMessage,
-  //       // selectedStudent?.name,
-  //       selectedStudent?._id,
-  //       admin._id,
-  //       admin.username,
-  //       new Date()
-  //     );
-  //     try {
-  //       if (selectedStudent?._id) {
-  //         await submitMessageStore(
-  //           selectedStudent._id,
-  //           myMessage,
-  //           admin._id,
-  //           admin.username,
-  //           new Date()
-  //         );
-  //         setMyMessage("");
-  //       }
-  //     } catch (e) {
-  //       console.log(e);
-  //     }
-  //   };
+  const submitMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(
+      "My message is",
+      myMessage,
+      // selectedStudent?.name,
+      user?._id,
+      // admin._id,
+      user?.name,
+      new Date()
+    );
+    try {
+      if (user?.name && conversation) {
+        await submitMessageStore(
+          conversation,
+          myMessage,
+          user._id,
+          user.name,
+          new Date()
+        );
+        setMyMessage("");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-  //   console.log("MyMessages", selectedStudent);
+  // console.log("MyMessages", selectedStudent);
 
   return (
     <motion.div
@@ -74,47 +84,17 @@ function OpenChatStd() {
         hidden: { opacity: 0, x: 20 },
         visible: { opacity: 1, x: 1 },
       }}
-      className={`text-black z-[10]   fixed top-[15%] overflow-y-hidden right-0 h-[75%] w-[50%] bg-slate-800  border-[1px] border-blue-400 rounded-xl py-10  `}
+      className={`text-black z-[10]    fixed top-[15%] overflow-y-hidden right-2 h-[75%] w-[50%] bg-slate-800  border-[1px] border-blue-400 rounded-xl   `}
     >
-      <div className="w-full pb-5 border-slate-600 border-b h-auto">
+      {/* <div className="w-full py-5 border-slate-600 border-b ">
         <h1 className="text-center text-xl text-blue-800 font-semibold ">
           LIBRARIA CHATS
         </h1>
-      </div>
+      </div> */}
 
       {/**CONTAINER */}
-      <div className="flex w-full h-full">
-        {/**STUDENTS CONTAINER */}
-        {/* <div className="w-[30%] overflow-y-auto py-4 px-2 border-r-2 border-r-blue-600   bg-slate-900 ">
-          <h2 className="text-xl mb-3">My Chats</h2>
-          <hr />
-          <div className="flex flex-col mt-4 gap-3">
-            {" "}
-            {students.map((student) => (
-              <p
-                onClick={() => openChatConversation(student)}
-                key={student._id}
-                style={{
-                  backgroundColor:
-                    student.name === selectedStudent?.name
-                      ? "rgba(214, 214, 212,0.1)"
-                      : "",
-                  color:
-                    student.name === selectedStudent?.name
-                      ? "rgb(245, 219, 6)"
-                      : "",
-                  fontSize:
-                    student.name === selectedStudent?.name ? "1.05rem" : "",
-                }}
-                className={`cursor-pointer transition-all duration-200 px-1 py-2 border-slate-700 border-b-[1px] hover:text-yellow-500 text-sm font-semibold text-slate-500`}
-              >
-                {student.name}
-              </p>
-            ))}
-          </div>
-        </div> */}
-        {/**CHAT CONTAINER */}
-        <div className="w-[100%]  bg-slate-100 flex flex-col">
+      <div className="flex h-[100%] w-full ">
+        <div className="w-[100%]   bg-slate-100 flex flex-col">
           <div className="flex h-[70%] overflow-y-auto px-4 py-8 gap-8 flex-col">
             {/* {selectedStudent ? (
               <Message student={selectedStudent} />
@@ -130,8 +110,8 @@ function OpenChatStd() {
             )}
           </div>
           <form
-            // onSubmit={submitMessage}
-            className="my-auto bg-slate-100 gap-2 justify-center  w-[100%] h-[40%] px-5 items-center flex py-2"
+            onSubmit={submitMessage}
+            className="my-auto bg-slate-100 border-t  gap-2 justify-center  w-[100%] h-[40%] px-5 items-center flex py-2"
           >
             <textarea
               className="min-w-[400px] text-black h-[80%] bg-slate-200 px-3 rounded-xl  "
@@ -139,7 +119,7 @@ function OpenChatStd() {
               required
               onChange={(e) => setMyMessage(e.target.value)}
             />
-            <button className="bg-green-600 pb-1 text-sm px-3  rounded-md ">
+            <button className="bg-green-600 text-white pb-1 text-sm px-3  rounded-md ">
               <SendIcon style={{ fontSize: "1.1rem" }} />
             </button>
           </form>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import userStore from "../store/UserStore";
 import { format } from "timeago.js";
 
@@ -27,6 +27,8 @@ function Message({ student }: Props) {
   // const [conversation, setConversation] = useState<Conversation | null>();
   const { user, setConversationStore, conversation } = userStore();
 
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     console.log("Selected student", student);
 
@@ -47,11 +49,14 @@ function Message({ student }: Props) {
       }
     };
     getConversation();
-  }, [student._id]);
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversation?._id, student._id]);
 
   return conversation ? (
     conversation.messages?.map((message) => (
       <div
+        key={message.timestamp}
+        ref={scrollRef}
         className={`${message.sender.user_id === user?._id ? "self-start" : " text-black self-end"} w-[50%]`}
       >
         <p className={`${user?.username ? "text-white" : "text-black"}`}>
