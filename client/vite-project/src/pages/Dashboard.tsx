@@ -36,7 +36,7 @@ function Dashboard() {
             }}
             className="  text-slate-50 font-bold text-5xl "
           >
-            Welcome admin!
+            Welcome {admin.username}!
           </motion.h1>
           <motion.button
             initial="hidden"

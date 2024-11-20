@@ -12,6 +12,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import ChatIcon from "@mui/icons-material/Chat";
 import bookStore from "../store/BookStore";
+import OpenChatStd from "./OpenChatStd";
 // import PersonIcon from "@mui/icons-material/Person";
 
 type Props = {
@@ -35,6 +36,7 @@ function Navbar({ activeSection }: Props) {
   const { addStudentStore, loginStudent, loggedStudent, logoutStudent } =
     userStore();
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
+  const [openChat, setOpenChat] = useState(false);
   const [isOpenRegisterModal, setIsOpenRegisterModal] = useState(false);
   const [studentRegister, setStudentRegister] = useState<studentType>({
     name: "",
@@ -114,6 +116,7 @@ function Navbar({ activeSection }: Props) {
     localStorage.removeItem("tokenstd");
     logoutStudent();
     closeModal();
+    setOpenChat(false);
     try {
       await getAllBookStore();
     } catch (e) {
@@ -248,15 +251,17 @@ function Navbar({ activeSection }: Props) {
               Log out <LogoutIcon style={{ fontSize: "1rem" }} />
             </button>
             <button
-              className=" border rounded-lg text-[0.6rem] px-2 py-1 hover:text-green-700 hover:bg-opacity-0 duration-200 transition-all border-green-700 bg-green-700"
-              // onClick={() => studentLogout()}
+              className={`border rounded-lg text-[0.6rem] px-2 py-1 ${openChat ? "hover:text-blue-700 border-blue-700 bg-blue-700" : "hover:text-green-700 border-green-700 bg-green-700"} hover:bg-opacity-0 duration-200 transition-all `}
+              onClick={() => setOpenChat((prev) => !prev)}
               // to=""
             >
-              My Chats <ChatIcon style={{ fontSize: "1rem" }} />
+              {openChat ? "Close Chats" : "My Chats"}{" "}
+              <ChatIcon style={{ fontSize: "1rem" }} />
             </button>
           </>
         )}
       </motion.div>
+      {openChat && <OpenChatStd />}
 
       <Modal
         isOpen={logoutModal}

@@ -5,10 +5,12 @@ import { useRef } from "react";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import userStore from "../store/UserStore";
 
 function Login() {
   const adminUserRef = useRef<HTMLInputElement>(null);
   const { enqueueSnackbar } = useSnackbar();
+  const { setAdmin } = userStore();
   const adminpwdRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
@@ -33,12 +35,14 @@ function Login() {
 
       console.log("The admin api is", adminApi.data);
 
-      localStorage.setItem("token", `Bearer ${adminApi.data}`);
+      localStorage.setItem("token", `Bearer ${adminApi.data.token}`);
       navigate("/dashboard/home");
       enqueueSnackbar("Logged in successfuly", {
         variant: "success",
         anchorOrigin: { horizontal: "right", vertical: "bottom" },
       });
+
+      setAdmin(adminApi.data);
     } catch (e: any) {
       enqueueSnackbar("Wrong credentials", {
         variant: "error",

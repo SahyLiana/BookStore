@@ -27,7 +27,11 @@ export class AdminService {
         username: findAdmin.username,
         _id: findAdmin._id,
       };
-      return this.jwtService.sign(userData);
+      return {
+        token: this.jwtService.sign(userData),
+        _id: findAdmin._id,
+        username: findAdmin.username,
+      };
     }
 
     throw new HttpException('Invalid credential', HttpStatus.UNAUTHORIZED);

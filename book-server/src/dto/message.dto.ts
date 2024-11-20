@@ -12,4 +12,8 @@ export class MessageDto {
   @IsNotEmpty()
   @IsString()
   message;
+
+  @IsNotEmpty()
+  @IsString()
+  timestamp;
 }

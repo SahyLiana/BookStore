@@ -40,14 +40,14 @@ export class ConversationService {
           },
         ],
       });
-      return newConversation.save();
+      return await newConversation.save();
     }
 
     return findConversation;
   }
 
   async postMessageService(stdId: string, message: MessageDto) {
-    console.log('PostMessageService', MessageDto);
+    console.log('PostMessageService', message);
 
     const isValid = mongoose.Types.ObjectId.isValid(stdId);
 
@@ -72,7 +72,7 @@ export class ConversationService {
           messages: {
             sender: { user_id: message.senderId, user: message.senderName },
             message: message.message,
-            timestamp: new Date(),
+            timestamp: message.timestamp,
           },
         },
       },

@@ -3,6 +3,7 @@ import { create } from "zustand";
 import bookStore from "./BookStore";
 
 type adminLoginType = {
+  _id: string;
   username: string;
   password: string;
 };
@@ -14,10 +15,33 @@ type Student = {
   password: string;
 };
 
+type User = {
+  _id: string;
+  name?: string;
+  username?: string;
+  password?: string;
+  email?: string;
+};
+
+type Conversation = {
+  _id: string;
+  members: { name: string; userId: string }[];
+  messages?: {
+    sender: {
+      user_id: string;
+      user: string;
+    };
+    message: string;
+    timestamp: string;
+  }[];
+};
+
 type State = {
   admin: Omit<adminLoginType, "password">;
   students: Omit<Student, "password">[];
+  user: User | null;
   loggedStudent: Omit<Student, "password"> | null;
+  conversation: Conversation | null;
 };
 
 type Actions = {
@@ -33,17 +57,50 @@ type Actions = {
   logoutStudent: () => void;
   setStudent: (student: Omit<Student, "password">) => void;
   getAdminDashboard: (token: string | null) => void;
+  setConversationStore: (conversation: Conversation) => void;
+  submitMessageStore: (
+    stdId: string,
+    message: string,
+    senderId: string,
+    senderName: string,
+    timestamp: Date
+  ) => void;
 };
 
 const userStore = create<Actions & State>((set) => ({
-  admin: { username: "" },
+  admin: { username: "", _id: "" },
+  user: null,
+  conversation: null,
   students: [],
   loggedStudent: null,
+  setConversationStore(conversation: Conversation) {
+    console.log("setConversationStore", conversation);
+    set((state) => ({
+      ...state,
+      conversation: { ...state.conversation, ...conversation },
+    }));
+  },
+
+  async submitMessageStore(
+    stdId: string,
+    message: string,
+    senderId: string,
+    senderName: string,
+    timestamp: Date
+  ) {
+    console.log("submitMessageStore", stdId, message, timestamp);
+    const submitMsgCall = await axios.patch(
+      `http://localhost:3000/api/conversation/${stdId}`,
+      { senderId, senderName, message, timestamp }
+    );
+    console.log("submitMessageData", submitMsgCall.data);
+  },
 
   setStudent(student: Omit<Student, "password">) {
     set((state) => ({
       ...state,
       loggedStudent: { ...student },
+      user: { ...student },
     }));
   },
 
@@ -52,7 +109,8 @@ const userStore = create<Actions & State>((set) => ({
 
     set((state) => ({
       ...state,
-      admin: admin,
+      admin: { ...admin },
+      user: { ...admin },
     }));
   },
 
@@ -150,6 +208,7 @@ const userStore = create<Actions & State>((set) => ({
     set((state) => ({
       ...state,
       loggedStudent: { ...loginCall.data._doc },
+      user: { ...loginCall.data._doc },
     }));
 
     return loginCall.data.token;
@@ -159,6 +218,7 @@ const userStore = create<Actions & State>((set) => ({
     set((state) => ({
       ...state,
       loggedStudent: null,
+      user: null,
     }));
   },
 }));
