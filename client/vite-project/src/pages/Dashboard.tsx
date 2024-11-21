@@ -3,16 +3,58 @@ import AdminNav from "../components/AdminNav";
 
 import userStore from "../store/UserStore";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OpenChat from "../components/OpenChat";
 import ChatIcon from "@mui/icons-material/Chat";
+import { io } from "socket.io-client";
+// const socketIo = io("http://localhost:3002");
 
 function Dashboard() {
-  const { admin } = userStore();
+  const { admin, setOnlineUsers, socket, onlineUsers, setSocket } = userStore();
+
   // const { getAllBookStore } = bookStore();
   // const token = localStorage.getItem("token");
 
   const [openChat, setOpenChat] = useState(false);
+
+  useEffect(() => {
+    // setSocket(socket);
+    console.log("socket Dashboard", socket);
+
+    if (!socket && admin) {
+      const socketIo = io("http://localhost:3002");
+      console.log("socket Dashboard", socketIo);
+      setSocket(socketIo);
+      socketIo.on("connected", (id) => {
+        console.log("My socketid is:", id);
+      });
+    }
+
+    if (socket) {
+      console.log("socket dashboard", socket, admin);
+
+      // setSocket(socketIo);
+      socket.on("connected", (id: string) => {
+        console.log("socket id", id);
+      });
+      socket.emit("addUsers", admin?._id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      socket.on("users", (users: any) => {
+        console.log("connected socket users", users);
+        setOnlineUsers(users);
+      });
+      // setSocket(socketIo);
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    if (socket) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      socket.on("users", (users: any) => {
+        console.log("connected socket users", users);
+      });
+    }
+  }, [onlineUsers]);
 
   console.log(admin);
 
@@ -36,7 +78,7 @@ function Dashboard() {
             }}
             className="  text-slate-50 font-bold text-5xl "
           >
-            Welcome {admin.username}!
+            Welcome {admin?.username}!
           </motion.h1>
           <motion.button
             initial="hidden"

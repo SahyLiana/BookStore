@@ -7,6 +7,8 @@ import Featured from "../sections/Featured";
 import MyBooks from "../sections/MyBooks";
 import { motion } from "framer-motion";
 import BannerImg from "../assets/girlslib.jpg";
+import { io } from "socket.io-client";
+const socketIo = io("http://localhost:3002");
 
 import "./home.css";
 import bookStore from "../store/BookStore";
@@ -17,7 +19,14 @@ function Home() {
   const [activeSection, setActiveSection] = useState("Home");
   const { getAllBookStore } = bookStore();
   const [sticky, setSticky] = useState(false);
-  const { loggedStudent, setStudent } = userStore();
+  const {
+    loggedStudent,
+    setSocket,
+    setStudent,
+    onlineUsers,
+    setOnlineUsers,
+    socket,
+  } = userStore();
 
   useEffect(() => {
     const handleSticky = () => {
@@ -32,6 +41,41 @@ function Home() {
   }, []);
 
   useEffect(() => {
+    if (socket) {
+      console.log("logged std home", loggedStudent);
+      socket.on("connected", (id: string) => {
+        console.log("socket id", id, loggedStudent?._id);
+      });
+      socket.emit("addUsers", loggedStudent && loggedStudent._id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      socket.on("users", (users: any) => {
+        console.log("connected socket users", users);
+        setOnlineUsers(users);
+      });
+    }
+  }, [socket]);
+
+  // useEffect(() => {
+  //   console.log("logged socket", loggedStudent);
+  //   if (loggedStudent?._id) {
+  //     console.log("logged out socket", loggedStudent);
+  //     setSocket(socketIo);
+  //     socketIo.on("connected", (id: string) => {
+  //       console.log("My socketid is:", id);
+  //     });
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    if (socket) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      socket.on("users", (users: any) => {
+        console.log("connected socket users", users);
+      });
+    }
+  }, [onlineUsers]);
+
+  useEffect(() => {
     const getStudentFun = async () => {
       try {
         const getNextOutlet = await axios.get(
@@ -44,6 +88,13 @@ function Home() {
         );
 
         console.log("getStudent", getNextOutlet);
+        if (getNextOutlet) {
+          console.log("logged out socket", loggedStudent);
+          setSocket(socketIo);
+          socketIo.on("connected", (id: string) => {
+            console.log("My socketid is:", id);
+          });
+        }
         // setAdmin(getNextOutlet.data);
         setStudent(getNextOutlet.data);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

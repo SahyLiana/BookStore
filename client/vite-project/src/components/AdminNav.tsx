@@ -7,12 +7,15 @@ import Student from "@mui/icons-material/Person";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import "./adminNavShadow.css";
+// import { io } from "socket.io-client";
+import userStore from "../store/UserStore";
 
 function AdminNav() {
   // const [link, setLink] = useState("home");
   const navigate = useNavigate();
 
   const location = useLocation();
+  const { socket, setAdmin, setSocket } = userStore();
 
   const [currentLocation, setCurrentLocation] = useState("");
 
@@ -22,8 +25,22 @@ function AdminNav() {
   }, [location]);
 
   const handleLogOut = () => {
+    console.log("Socket disconnect", socket);
+    setAdmin(null);
+    if (socket) {
+      console.log("My socket admin disconnect is:", socket);
+      socket.on("connected", (id: string) => {
+        console.log("My socket logout is:", id);
+      });
+      socket.disconnect();
+      // setSocket(socket);
+    }
+
     localStorage.removeItem("token");
+    setSocket(null);
+
     navigate("/login");
+    // window.location.reload();
   };
 
   return (

@@ -8,6 +8,9 @@ type adminLoginType = {
   password: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SocketType = any;
+
 type Student = {
   _id: string;
   name: string;
@@ -21,6 +24,11 @@ type User = {
   username?: string;
   password?: string;
   email?: string;
+};
+
+type OnlineUsers = {
+  socketId: string;
+  userId: string;
 };
 
 type Conversation = {
@@ -37,19 +45,23 @@ type Conversation = {
 };
 
 type State = {
-  admin: Omit<adminLoginType, "password">;
+  admin: Omit<adminLoginType, "password"> | null;
   students: Omit<Student, "password">[];
+  onlineUsers: OnlineUsers[] | [];
   user: User | null;
   loggedStudent: Omit<Student, "password"> | null;
   conversation: Conversation | null;
+  socket: SocketType | null;
 };
 
 type Actions = {
-  setAdmin: (admin: Omit<adminLoginType, "password">) => void;
+  setAdmin: (admin: Omit<adminLoginType, "password"> | null) => void;
   addStudentStore: (
     studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">,
     token?: string | null
   ) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setSocket: (socket: any) => void;
   getAllStudents: (token: string | null) => void;
   deleteStudentStore: (user: string, token: string | null) => void;
   // registerStudentStore: (studentData: Omit<Student, "_id">) => void;
@@ -57,6 +69,7 @@ type Actions = {
   logoutStudent: () => void;
   setStudent: (student: Omit<Student, "password">) => void;
   getAdminDashboard: (token: string | null) => void;
+
   setConversationStore: (conversation: Conversation) => void;
   submitMessageStore: (
     // stdId: string,
@@ -66,14 +79,30 @@ type Actions = {
     senderName: string,
     timestamp: Date
   ) => void;
+  setOnlineUsers: (online: OnlineUsers[]) => void;
 };
 
 const userStore = create<Actions & State>((set) => ({
-  admin: { username: "", _id: "" },
+  admin: null,
+  onlineUsers: [],
+  socket: null,
   user: null,
   conversation: null,
   students: [],
   loggedStudent: null,
+  setOnlineUsers(onlines) {
+    set((state) => ({
+      ...state,
+      onlineUsers: [...onlines],
+    }));
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setSocket(socket: any) {
+    set((state) => ({
+      ...state,
+      socket,
+    }));
+  },
   setConversationStore(conversation: Conversation) {
     console.log("setConversationStore", conversation);
     set((state) => ({
@@ -109,11 +138,19 @@ const userStore = create<Actions & State>((set) => ({
   setAdmin(admin) {
     console.log("Inside setAdmin store", admin);
 
-    set((state) => ({
-      ...state,
-      admin: { ...admin },
-      user: { ...admin },
-    }));
+    if (admin) {
+      set((state) => ({
+        ...state,
+        admin: { ...admin },
+        user: { ...admin },
+      }));
+    } else {
+      set((state) => ({
+        ...state,
+        admin: null,
+        user: null,
+      }));
+    }
   },
 
   async addStudentStore(

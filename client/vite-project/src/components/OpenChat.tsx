@@ -11,127 +11,7 @@ type Student = {
 };
 
 function OpenChat() {
-  // const messages: MessageType[] = [
-  //   {
-  //     // conversation_id: "2",
-  //     sender: {
-  //       user_id: "13",
-  //       user: "Tojo",
-  //     },
-  //     message: "Test",
-  //     timestamp: "just now",
-  //   },
-
-  //   {
-  //     // conversation_id: "1",
-  //     sender: {
-  //       user_id: "1a",
-  //       user: "admin",
-  //     },
-  //     message: "Hello,How are you?",
-  //     timestamp: "5mn ago",
-  //   },
-  //   {
-  //     // conversation_id: "1",
-  //     sender: {
-  //       user_id: "12",
-  //       user: "Sahy",
-  //     },
-  //     message: "I am fine sir, and you?",
-  //     timestamp: "3mn ago",
-  //   },
-  //   {
-  //     // conversation_id: "1",
-  //     sender: {
-  //       user_id: "1a",
-  //       user: "admin",
-  //     },
-  //     message: "I am fine bro.",
-  //     timestamp: "just now",
-  //   },
-  // ];
-
   const { students, admin, submitMessageStore, conversation } = userStore();
-  // const studentsChats: StudentConversationType[] = [
-  //   {
-  //     _id: "1",
-  //     members: [
-  //       { name: "admin", userId: "1a" },
-  //       { name: "Sahy", userId: "12" },
-  //     ],
-  //     messages: [
-  //       {
-  //         sender: {
-  //           user_id: "1a",
-  //           user: "admin",
-  //         },
-  //         message: "Hello,How are you?",
-  //         timestamp: "5mn ago",
-  //       },
-  //       {
-  //         sender: {
-  //           user_id: "12",
-  //           user: "Sahy",
-  //         },
-  //         message: "I am fine sir, and you?",
-  //         timestamp: "3mn ago",
-  //       },
-  //       {
-  //         sender: {
-  //           user_id: "1a",
-  //           user: "admin",
-  //         },
-  //         message: "I am fine bro.",
-  //         timestamp: "just now",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     _id: "2",
-  //     members: [
-  //       { name: "admin", userId: "1a" },
-  //       { name: "Tojo", userId: "13" },
-  //     ],
-  //     messages: [
-  //       {
-  //         sender: {
-  //           user_id: "13",
-  //           user: "Tojo",
-  //         },
-  //         message: "Test",
-  //         timestamp: "just now",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     _id: "3",
-  //     members: [
-  //       { name: "admin", userId: "1a" },
-  //       { name: "Hira", userId: "14" },
-  //     ],
-  //   },
-  //   {
-  //     _id: "4",
-  //     members: [
-  //       { name: "admin", userId: "1a" },
-  //       { name: "Bam", userId: "15" },
-  //     ],
-  //   },
-  //   {
-  //     _id: "5",
-  //     members: [
-  //       { name: "admin", userId: "1a" },
-  //       { name: "Neny", userId: "16" },
-  //     ],
-  //   },
-  //   {
-  //     _id: "6",
-  //     members: [
-  //       { name: "admin", userId: "1a" },
-  //       { name: "Dada", userId: "17" },
-  //     ],
-  //   },
-  // ];
 
   const [selectedStudent, setSelectedStudent] = useState<Student | null>();
 
@@ -159,14 +39,13 @@ function OpenChat() {
       // selectedStudent?.name,
       conversation,
       selectedStudent?._id,
-      admin._id,
-      admin.username,
+      admin?._id,
+      admin?.username,
       new Date()
     );
     try {
-      if (conversation) {
+      if (conversation && admin) {
         await submitMessageStore(
-          // selectedStudent._id,
           conversation,
           myMessage,
           admin._id,

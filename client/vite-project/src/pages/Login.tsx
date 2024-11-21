@@ -6,6 +6,7 @@ import axios from "axios";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import userStore from "../store/UserStore";
+// import { io } from "socket.io-client";
 
 function Login() {
   const adminUserRef = useRef<HTMLInputElement>(null);
@@ -34,6 +35,12 @@ function Login() {
       });
 
       console.log("The admin api is", adminApi.data);
+
+      // const socket = io("http://localhost:3002");
+      // setSocket(socket);
+      // socket.on("connected", (id) => {
+      //   console.log("My socketid is:", id);
+      // });
 
       localStorage.setItem("token", `Bearer ${adminApi.data.token}`);
       navigate("/dashboard/home");

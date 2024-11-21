@@ -10,22 +10,9 @@ type Props = {
     email?: string;
   };
 };
-
-// type Conversation = {
-//   members: { name: string; userId: string }[];
-//   messages?: {
-//     sender: {
-//       user_id: string;
-//       user: string;
-//     };
-//     message: string;
-//     timestamp: string;
-//   }[];
-// };
-
 function Message({ student }: Props) {
   // const [conversation, setConversation] = useState<Conversation | null>();
-  const { user, setConversationStore, conversation } = userStore();
+  const { user, setConversationStore, conversation, socket } = userStore();
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -43,6 +30,16 @@ function Message({ student }: Props) {
         setConversationStore({
           _id: conversationCall.data._id,
           ...conversationCall.data,
+        });
+
+        socket.emit("myConversation", {
+          _id: conversationCall.data._id,
+          ...conversationCall.data,
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        socket.on("getConversation", (conversation: any) => {
+          console.log("socket conversation", conversation);
         });
       } catch (e) {
         console.log(e);

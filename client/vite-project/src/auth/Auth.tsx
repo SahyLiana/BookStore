@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import userStore from "../store/UserStore";
 import { Skeleton, Box } from "@mui/material";
+// import { io } from "socket.io-client";
 
 function Auth() {
   const getToken = localStorage.getItem("token");
   const { setAdmin } = userStore();
+  // const { setSocket } = userStore();
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -24,8 +26,11 @@ function Auth() {
           }
         );
 
+        // if (admin) {
         console.log("getNextOutlet", getNextOutlet);
         setAdmin(getNextOutlet.data);
+
+        // }
       } catch (e: any) {
         console.log(e);
         navigate("/login");

@@ -3,6 +3,7 @@ import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 // import Modal from "react-modal";
 import Modal from "react-modal";
 import { motion } from "framer-motion";
+// import { io } from "socket.io-client";
 import React, { useRef, useState } from "react";
 import userStore from "../store/UserStore";
 import { useSnackbar } from "notistack";
@@ -13,6 +14,8 @@ import HowToRegIcon from "@mui/icons-material/HowToReg";
 import ChatIcon from "@mui/icons-material/Chat";
 import bookStore from "../store/BookStore";
 import OpenChatStd from "./OpenChatStd";
+import { io } from "socket.io-client";
+
 // import PersonIcon from "@mui/icons-material/Person";
 
 type Props = {
@@ -33,8 +36,15 @@ function Navbar({ activeSection }: Props) {
   const { getAllBookStore } = bookStore();
   const links = ["Home", "Categories", "Books", "My Books", "Featured"];
 
-  const { addStudentStore, loginStudent, loggedStudent, logoutStudent } =
-    userStore();
+  const {
+    addStudentStore,
+    setSocket,
+    loginStudent,
+    loggedStudent,
+    // user,
+    logoutStudent,
+    socket,
+  } = userStore();
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
   const [openChat, setOpenChat] = useState(false);
   const [isOpenRegisterModal, setIsOpenRegisterModal] = useState(false);
@@ -88,16 +98,21 @@ function Navbar({ activeSection }: Props) {
 
   const handleLoging = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log("Loging data is", loginStudentData);
     try {
       const tokenstd = await loginStudent(loginStudentData);
       enqueueSnackbar("Logged in successfuly", {
         variant: "success",
         anchorOrigin: { horizontal: "right", vertical: "bottom" },
       });
-      await getAllBookStore();
 
-      console.log("Tokenstd is Bearer", tokenstd);
+      await getAllBookStore();
+      const socket = io("http://localhost:3002");
+      setSocket(socket);
+      socket.on("connected", (id) => {
+        console.log("My socketid is:", id);
+      });
+
+      console.log("Tokenstd is Bearer", tokenstd, loggedStudent);
       localStorage.setItem("tokenstd", `Bearer ${tokenstd}`);
     } catch (e) {
       console.log(e);
@@ -116,7 +131,15 @@ function Navbar({ activeSection }: Props) {
     localStorage.removeItem("tokenstd");
     logoutStudent();
     closeModal();
+
     setOpenChat(false);
+    if (socket) {
+      console.log("My std socket is:", socket);
+      socket.on("connected", (id: string) => {
+        console.log("My socket logout is:", id);
+      });
+      socket.disconnect();
+    }
     try {
       await getAllBookStore();
     } catch (e) {
