@@ -10,7 +10,14 @@ import { io } from "socket.io-client";
 // const socketIo = io("http://localhost:3002");
 
 function Dashboard() {
-  const { admin, setOnlineUsers, socket, onlineUsers, setSocket } = userStore();
+  const {
+    admin,
+    setOnlineUsers,
+    socket,
+    onlineUsers,
+    setMessageConversationStore,
+    setSocket,
+  } = userStore();
 
   // const { getAllBookStore } = bookStore();
   // const token = localStorage.getItem("token");
@@ -43,7 +50,26 @@ function Dashboard() {
         console.log("connected socket users", users);
         setOnlineUsers(users);
       });
+      if (admin?.username) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        socket.on("getMessage", (msg: any) => {
+          if (msg) {
+            console.log("message socket", msg);
+            setMessageConversationStore(msg);
+          }
+        });
+      }
       // setSocket(socketIo);
+
+      // if (admin?.username) {
+      //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //   socket.on("getMessage", (msg: any) => {
+      //     if (msg) {
+      //       console.log("message socket", msg);
+      //       setMessageConversationStore(msg);
+      //     }
+      //   });
+      // }
     }
   }, [socket]);
 

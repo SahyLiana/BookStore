@@ -1,9 +1,9 @@
 import SendIcon from "@mui/icons-material/Send";
 import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Message from "./Message";
 import userStore from "../store/UserStore";
-import axios from "axios";
+// import axios from "axios";
 
 // type Student = {
 //   _id: string;
@@ -12,37 +12,13 @@ import axios from "axios";
 // };
 
 function OpenChatStd() {
-  const { user, submitMessageStore, setConversationStore, conversation } =
-    userStore();
-
-  useEffect(() => {
-    console.log("Selected student", user);
-
-    const getConversation = async () => {
-      try {
-        const conversationCall = await axios.get(
-          `http://localhost:3000/api/conversation/${user?._id}/${user?.name}`
-        );
-
-        console.log("conversationCall", conversationCall.data);
-        // setConversation(conversationCall.data);
-        setConversationStore({
-          _id: conversationCall.data._id,
-          ...conversationCall.data,
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getConversation();
-  }, [user?._id]);
-
-  //   const [selectedStudent, setSelectedStudent] = useState<Student | null>();
-
-  //   const openChatConversation = (studentConversation: Student) => {
-  //     console.log("Selected student", studentConversation);
-  //     setSelectedStudent(() => ({ ...studentConversation }));
-  //   };
+  const {
+    user,
+    submitMessageStore,
+    // setConversationStore,
+    conversation,
+    socket,
+  } = userStore();
 
   const [myMessage, setMyMessage] = useState("");
 
@@ -59,17 +35,33 @@ function OpenChatStd() {
     );
     try {
       if (user?.name && conversation) {
-        await submitMessageStore(
+        const messageResponse = await submitMessageStore(
           conversation,
           myMessage,
           user._id,
           user.name,
           new Date()
         );
-        setMyMessage("");
+
+        console.log("MessageResponse", messageResponse);
+
+        socket.emit("sentMessage", {
+          ...conversation,
+          receiverId: messageResponse.members[0].userId,
+          messages: [
+            ...(conversation.messages ?? []),
+            {
+              sender: { senderId: user._id, user: user.email },
+              message: myMessage,
+              timestamp: new Date(),
+            },
+          ],
+        });
       }
     } catch (e) {
       console.log(e);
+    } finally {
+      setMyMessage("");
     }
   };
 
@@ -116,6 +108,7 @@ function OpenChatStd() {
             <textarea
               className="min-w-[400px] text-black h-[80%] bg-slate-200 px-3 rounded-xl  "
               placeholder="Enter message..."
+              value={myMessage}
               required
               onChange={(e) => setMyMessage(e.target.value)}
             />

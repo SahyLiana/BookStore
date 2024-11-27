@@ -15,6 +15,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import bookStore from "../store/BookStore";
 import OpenChatStd from "./OpenChatStd";
 import { io } from "socket.io-client";
+import axios from "axios";
 
 // import PersonIcon from "@mui/icons-material/Person";
 
@@ -43,7 +44,9 @@ function Navbar({ activeSection }: Props) {
     loggedStudent,
     // user,
     logoutStudent,
+    setOnlineUsers,
     socket,
+    setConversationStore,
   } = userStore();
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
   const [openChat, setOpenChat] = useState(false);
@@ -99,20 +102,37 @@ function Navbar({ activeSection }: Props) {
   const handleLoging = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const tokenstd = await loginStudent(loginStudentData);
+      const { tokenstd, _id, name } = await loginStudent(loginStudentData);
       enqueueSnackbar("Logged in successfuly", {
         variant: "success",
         anchorOrigin: { horizontal: "right", vertical: "bottom" },
       });
 
-      await getAllBookStore();
-      const socket = io("http://localhost:3002");
-      setSocket(socket);
-      socket.on("connected", (id) => {
-        console.log("My socketid is:", id);
+      console.log("My id", _id, name);
+
+      const socketIo = io("http://localhost:3002");
+      setSocket(socketIo);
+      socketIo.emit("addUsers", _id);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      socketIo.on("users", (users: any) => {
+        console.log("connected socket users", users);
+        setOnlineUsers(users);
       });
 
-      console.log("Tokenstd is Bearer", tokenstd, loggedStudent);
+      const conversationCall = await axios.get(
+        `http://localhost:3000/api/conversation/${_id}/${name}`
+      );
+
+      console.log("conversationCall", conversationCall.data);
+      // setConversation(conversationCall.data);
+      setConversationStore({
+        _id: conversationCall.data._id,
+        ...conversationCall.data,
+      });
+
+      await getAllBookStore();
+
+      console.log("Tokenstd is", tokenstd, loggedStudent);
       localStorage.setItem("tokenstd", `Bearer ${tokenstd}`);
     } catch (e) {
       console.log(e);

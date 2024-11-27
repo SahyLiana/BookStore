@@ -15,6 +15,11 @@ import { MessageDto } from 'src/dto/message.dto';
 export class ConversationController {
   constructor(private conversationService: ConversationService) {}
 
+  @Get()
+  getAllconversations() {
+    return this.conversationService.getAllConversationService();
+  }
+
   @Get(':studentId/:name')
   getConversation(
     @Param('studentId') stdId: string,

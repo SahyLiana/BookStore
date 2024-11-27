@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
@@ -24,8 +25,10 @@ function Home() {
     setSocket,
     setStudent,
     onlineUsers,
-    setOnlineUsers,
+    // setOnlineUsers,
     socket,
+    setConversationStore,
+    setMessageConversationStore,
   } = userStore();
 
   useEffect(() => {
@@ -46,25 +49,15 @@ function Home() {
       socket.on("connected", (id: string) => {
         console.log("socket id", id, loggedStudent?._id);
       });
-      socket.emit("addUsers", loggedStudent && loggedStudent._id);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      socket.on("users", (users: any) => {
-        console.log("connected socket users", users);
-        setOnlineUsers(users);
+      socket.on("getMessage", (msg: any) => {
+        console.log("Message from socket", msg.message);
+
+        if (msg) {
+          setMessageConversationStore(msg);
+        }
       });
     }
   }, [socket]);
-
-  // useEffect(() => {
-  //   console.log("logged socket", loggedStudent);
-  //   if (loggedStudent?._id) {
-  //     console.log("logged out socket", loggedStudent);
-  //     setSocket(socketIo);
-  //     socketIo.on("connected", (id: string) => {
-  //       console.log("My socketid is:", id);
-  //     });
-  //   }
-  // }, []);
 
   useEffect(() => {
     if (socket) {
@@ -76,6 +69,7 @@ function Home() {
   }, [onlineUsers]);
 
   useEffect(() => {
+    console.log("token", localStorage.getItem("tokenstd"));
     const getStudentFun = async () => {
       try {
         const getNextOutlet = await axios.get(
@@ -87,6 +81,17 @@ function Home() {
           }
         );
 
+        const conversationCall = await axios.get(
+          `http://localhost:3000/api/conversation/${getNextOutlet.data._id}/${getNextOutlet.data.name}`
+        );
+
+        console.log("conversationCall", conversationCall.data);
+        // setConversation(conversationCall.data);
+        setConversationStore({
+          _id: conversationCall.data._id,
+          ...conversationCall.data,
+        });
+
         console.log("getStudent", getNextOutlet);
         if (getNextOutlet) {
           console.log("logged out socket", loggedStudent);
@@ -94,6 +99,7 @@ function Home() {
           socketIo.on("connected", (id: string) => {
             console.log("My socketid is:", id);
           });
+          socketIo.emit("addUsers", getNextOutlet.data._id);
         }
         // setAdmin(getNextOutlet.data);
         setStudent(getNextOutlet.data);
@@ -104,7 +110,7 @@ function Home() {
     };
     console.log("Student token", localStorage.getItem("tokenstd"));
     getStudentFun();
-  }, []);
+  }, [loggedStudent?._id]);
 
   useEffect(() => {
     const handleScroll = () => {

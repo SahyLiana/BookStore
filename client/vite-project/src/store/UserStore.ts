@@ -40,8 +40,19 @@ type Conversation = {
       user: string;
     };
     message: string;
-    timestamp: string;
+    timestamp: Date;
   }[];
+};
+
+type MessageType = {
+  message: {
+    sender: {
+      senderId: string;
+      user: string;
+    };
+    message: string;
+    timestamp: Date;
+  };
 };
 
 type State = {
@@ -65,10 +76,13 @@ type Actions = {
   getAllStudents: (token: string | null) => void;
   deleteStudentStore: (user: string, token: string | null) => void;
   // registerStudentStore: (studentData: Omit<Student, "_id">) => void;
-  loginStudent: (student: Omit<Student, "_id" | "name">) => Promise<string>;
+  loginStudent: (
+    student: Omit<Student, "_id" | "name">
+  ) => Promise<{ tokenstd: string; _id: string; name: string }>;
   logoutStudent: () => void;
   setStudent: (student: Omit<Student, "password">) => void;
   getAdminDashboard: (token: string | null) => void;
+  setMessageConversationStore: (msg: MessageType) => void;
 
   setConversationStore: (conversation: Conversation) => void;
   submitMessageStore: (
@@ -78,7 +92,7 @@ type Actions = {
     senderId: string,
     senderName: string,
     timestamp: Date
-  ) => void;
+  ) => Promise<Conversation>;
   setOnlineUsers: (online: OnlineUsers[]) => void;
 };
 
@@ -103,12 +117,41 @@ const userStore = create<Actions & State>((set) => ({
       socket,
     }));
   },
+
   setConversationStore(conversation: Conversation) {
     console.log("setConversationStore", conversation);
     set((state) => ({
       ...state,
       conversation: { ...state.conversation, ...conversation },
     }));
+  },
+
+  setMessageConversationStore(msg: MessageType) {
+    console.log("SetMessageConversationStore", msg);
+    if (msg) {
+      set((state) => {
+        if (state.conversation) {
+          return {
+            ...state,
+            conversation: {
+              ...state.conversation,
+              messages: [
+                ...(state.conversation.messages ?? []),
+                {
+                  ...msg.message,
+                  sender: {
+                    ...msg.message.sender,
+                    user_id: msg.message.sender.senderId,
+                  },
+                },
+              ],
+            },
+          };
+        } else {
+          return { ...state };
+        }
+      });
+    }
   },
 
   async submitMessageStore(
@@ -125,6 +168,12 @@ const userStore = create<Actions & State>((set) => ({
       { senderId, senderName, message, timestamp }
     );
     console.log("submitMessageData", submitMsgCall.data);
+    set((state) => ({
+      ...state,
+      conversation: { ...submitMsgCall.data },
+    }));
+
+    return submitMsgCall.data;
   },
 
   setStudent(student: Omit<Student, "password">) {
@@ -250,7 +299,11 @@ const userStore = create<Actions & State>((set) => ({
       user: { ...loginCall.data._doc },
     }));
 
-    return loginCall.data.token;
+    return {
+      tokenstd: loginCall.data.token,
+      _id: loginCall.data._doc._id,
+      name: loginCall.data._doc.name,
+    };
   },
 
   logoutStudent() {

@@ -11,48 +11,52 @@ type Props = {
   };
 };
 function Message({ student }: Props) {
+  console.log("selected student from message", student);
   // const [conversation, setConversation] = useState<Conversation | null>();
-  const { user, setConversationStore, conversation, socket } = userStore();
+  const {
+    user,
+    setConversationStore,
+    conversation,
+    // setMessageConversationStore,
+    // socket,
+  } = userStore();
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    console.log("Selected student", student);
-
     const getConversation = async () => {
+      console.log("getConversation");
       try {
         const conversationCall = await axios.get(
           `http://localhost:3000/api/conversation/${student._id}/${student.name}`
         );
 
         console.log("conversationCall", conversationCall.data);
-        // setConversation(conversationCall.data);
+
         setConversationStore({
           _id: conversationCall.data._id,
           ...conversationCall.data,
-        });
-
-        socket.emit("myConversation", {
-          _id: conversationCall.data._id,
-          ...conversationCall.data,
-        });
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        socket.on("getConversation", (conversation: any) => {
-          console.log("socket conversation", conversation);
         });
       } catch (e) {
         console.log(e);
       }
     };
-    getConversation();
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (user?.username) {
+      console.log("Selected student", student);
+      getConversation();
+    }
   }, [conversation?._id, student._id]);
 
+  console.log("my conversation", conversation);
+
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversation]);
+
   return conversation ? (
-    conversation.messages?.map((message) => (
+    conversation.messages?.map((message, index) => (
       <div
-        key={message.timestamp}
+        key={index}
         ref={scrollRef}
         className={`${message.sender.user_id === user?._id ? "self-start" : " text-black self-end"} w-[50%]`}
       >

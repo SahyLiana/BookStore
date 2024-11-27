@@ -88,4 +88,11 @@ export class ConversationService {
 
     return newConversation;
   }
+
+  async getAllConversationService() {
+    console.log('GetallConversationService');
+    const allConversation = await this.conversationModel.find({});
+
+    return allConversation;
+  }
 }

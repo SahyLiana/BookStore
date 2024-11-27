@@ -1,8 +1,9 @@
 import SendIcon from "@mui/icons-material/Send";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Message from "./Message";
 import userStore from "../store/UserStore";
+import axios from "axios";
 
 type Student = {
   _id: string;
@@ -10,23 +11,65 @@ type Student = {
   email: string;
 };
 
+type Conversation = {
+  _id: string;
+  members: { name: string; userId: string }[];
+  messages?: {
+    sender: {
+      user_id: string;
+      user: string;
+    };
+    message: string;
+    timestamp: string;
+  }[];
+};
+
 function OpenChat() {
-  const { students, admin, submitMessageStore, conversation } = userStore();
+  const {
+    students,
+    admin,
+    // setMessageConversationStore,
+    submitMessageStore,
+    conversation,
+    socket,
+    // user,
+  } = userStore();
+
+  const [conversations, setConversations] = useState<Conversation[] | []>();
 
   const [selectedStudent, setSelectedStudent] = useState<Student | null>();
 
-  // const [conversationMessages, setConversationMessages] = useState<
-  //   MessageType[]
-  // >([]);
+  useEffect(() => {
+    async function getAllConversations() {
+      const conversationsCall = await axios.get(
+        "http://localhost:3000/api/conversation/"
+      );
+      console.log(conversationsCall.data);
+
+      setConversations(conversationsCall.data);
+      socket.emit("allConversations", conversationsCall.data);
+    }
+
+    getAllConversations();
+  }, []);
+
+  // useEffect(() => {
+  //   if (user?.username && user._id) {
+  //     setMessageConversationStore({
+  //       message: {
+  //         sender: { senderId: user._id, user: user.username },
+  //         message: myMessage,
+  //         timestamp: new Date(),
+  //       },
+  //     });
+  //   }
+  // }, [conversation]);
+
+  console.log("All conversations", conversations);
 
   const openChatConversation = (studentConversation: Student) => {
     console.log("Selected student", studentConversation);
     setSelectedStudent(() => ({ ...studentConversation }));
-    // const myMessages = messages.filter(
-    //   (message) => message.conversation_id === studentConversation._id
-    // );
-
-    // setConversationMessages(myMessages);
   };
 
   const [myMessage, setMyMessage] = useState("");
@@ -52,9 +95,39 @@ function OpenChat() {
           admin.username,
           new Date()
         );
+
+        // if (user?.username && user._id) {
+        //   setMessageConversationStore({
+        //     message: {
+        //       sender: { senderId: user._id, user: user.username },
+        //       message: myMessage,
+        //       timestamp: new Date(),
+        //     },
+        //   });
+        // }
+
+        socket.emit("sentMessage", {
+          ...conversation,
+          receiverId: selectedStudent?._id,
+          messages: [
+            ...(conversation.messages ?? []),
+            {
+              sender: { senderId: admin._id, user: admin.username },
+              message: myMessage,
+              timestamp: new Date(),
+            },
+          ],
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        socket.on("getMessage", (convMsg: any) => {
+          console.log("Getmessage socket", convMsg);
+        });
       }
     } catch (e) {
       console.log(e);
+    } finally {
+      setMyMessage("");
     }
   };
 
@@ -127,6 +200,7 @@ function OpenChat() {
               <textarea
                 className="min-w-[400px] focus:outline-none text-black  h-[80%] bg-slate-200 px-3 rounded-xl  "
                 placeholder="Enter message..."
+                value={myMessage}
                 required
                 onChange={(e) => setMyMessage(e.target.value)}
               />
