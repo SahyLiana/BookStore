@@ -4,7 +4,7 @@ import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import Modal from "react-modal";
 import { motion } from "framer-motion";
 // import { io } from "socket.io-client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import userStore from "../store/UserStore";
 import { useSnackbar } from "notistack";
 import LoginIcon from "@mui/icons-material/Login";
@@ -21,6 +21,8 @@ import axios from "axios";
 
 type Props = {
   activeSection: string;
+  setOpenChat: (prev: boolean) => void;
+  openChat: boolean;
   sticky: boolean;
 };
 
@@ -32,7 +34,7 @@ type studentType = {
 
 Modal.setAppElement("#root");
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function Navbar({ activeSection }: Props) {
+function Navbar({ activeSection, setOpenChat, openChat }: Props) {
   const { enqueueSnackbar } = useSnackbar();
   const { getAllBookStore } = bookStore();
   const links = ["Home", "Categories", "Books", "My Books", "Featured"];
@@ -42,14 +44,18 @@ function Navbar({ activeSection }: Props) {
     setSocket,
     loginStudent,
     loggedStudent,
-    // user,
+    user,
     logoutStudent,
     setOnlineUsers,
     socket,
+    conversation,
+    setUnreadStdMsg,
+    unreadStdMsg,
     setConversationStore,
   } = userStore();
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
-  const [openChat, setOpenChat] = useState(false);
+  // const [openChat, setOpenChat] = useState(false);
+  // const [unread, setUnread] = useState(0);
   const [isOpenRegisterModal, setIsOpenRegisterModal] = useState(false);
   const [studentRegister, setStudentRegister] = useState<studentType>({
     name: "",
@@ -76,6 +82,22 @@ function Navbar({ activeSection }: Props) {
     setIsOpenLoginModal(false);
   }
 
+  function openChatFun() {
+    if (openChat === false) {
+      setOpenChat(true);
+      if (conversation) {
+        setConversationStore({ ...conversation, isOpen: true });
+        console.log("my conv is", conversation);
+      }
+    } else {
+      setOpenChat(false);
+      if (conversation) {
+        setConversationStore({ ...conversation, isOpen: false });
+        console.log("my conv is", conversation);
+      }
+    }
+  }
+
   function closeModal() {
     setIsOpenLoginModal(false);
     setStudentRegister({
@@ -84,6 +106,7 @@ function Navbar({ activeSection }: Props) {
       password: "",
     });
     setIsOpenRegisterModal(false);
+    // if (conversation) setConversationStore({ ...conversation, isOpen: false });
     setStudentLoginData({ email: "", password: "" });
     setLogoutModal(false);
   }
@@ -119,8 +142,10 @@ function Navbar({ activeSection }: Props) {
         setOnlineUsers(users);
       });
 
+      console.log("conversationCall");
+
       const conversationCall = await axios.get(
-        `http://localhost:3000/api/conversation/${_id}/${name}`
+        `http://localhost:3000/api/conversation/${_id}`
       );
 
       console.log("conversationCall", conversationCall.data);
@@ -128,6 +153,7 @@ function Navbar({ activeSection }: Props) {
       setConversationStore({
         _id: conversationCall.data._id,
         ...conversationCall.data,
+        isOpen: false,
       });
 
       await getAllBookStore();
@@ -145,7 +171,7 @@ function Navbar({ activeSection }: Props) {
     }
   };
 
-  console.log("Logged student is:", loggedStudent);
+  // console.log("Logged student is:", loggedStudent);
 
   const studentLogout = async () => {
     localStorage.removeItem("tokenstd");
@@ -174,7 +200,7 @@ function Navbar({ activeSection }: Props) {
 
     console.log("User registered", studentRegister);
     if (studentRegister.password !== confirmPass) {
-      console.log("Password mismatch");
+      // console.log("Password mismatch");
       enqueueSnackbar("Password mismatch", {
         variant: "error",
         anchorOrigin: { horizontal: "right", vertical: "bottom" },
@@ -204,6 +230,32 @@ function Navbar({ activeSection }: Props) {
     // console.log("User registered", studentRegister);
     closeModal();
   };
+
+  useEffect(() => {
+    const getUnreadMessage = () => {
+      // console.log("Unread", conversation, user);
+      if (conversation?.messages) {
+        const a = conversation?.messages.reduce((accumulator, msg) => {
+          if (!msg.read) {
+            if (msg.sender.user_id !== user?._id) {
+              return accumulator + 1;
+            } else {
+              return accumulator + 0;
+            }
+          } else {
+            return accumulator + 0;
+          }
+        }, 0);
+        // console.log("Unread", a);
+        return a;
+      } else {
+        // console.log("Unread ...");
+        return 0;
+      }
+    };
+    setUnreadStdMsg(getUnreadMessage());
+  }, [conversation]);
+
   return (
     <div
       className={`w-full top-0 bg-slate-900 flex items-center   max-h-[120px] z-50 justify-between   bg-opacity-90 text-white  border-b-[0.01rem] py-4 px-3 border-slate-400`}
@@ -294,12 +346,15 @@ function Navbar({ activeSection }: Props) {
               Log out <LogoutIcon style={{ fontSize: "1rem" }} />
             </button>
             <button
-              className={`border rounded-lg text-[0.6rem] px-2 py-1 ${openChat ? "hover:text-blue-700 border-blue-700 bg-blue-700" : "hover:text-green-700 border-green-700 bg-green-700"} hover:bg-opacity-0 duration-200 transition-all `}
-              onClick={() => setOpenChat((prev) => !prev)}
+              className={`border relative rounded-lg text-[0.6rem] px-2 py-1 ${openChat ? "hover:text-blue-700 border-blue-700 bg-blue-700" : "hover:text-green-700 border-green-700 bg-green-700"} hover:bg-opacity-0 duration-200 transition-all `}
+              onClick={() => openChatFun()}
               // to=""
             >
               {openChat ? "Close Chats" : "My Chats"}{" "}
               <ChatIcon style={{ fontSize: "1rem" }} />
+              <div className="absolute top-0 right-0 bg-white rounded-full text-[0.6rem] text-green-500 py-1 px-2 font-bold translate-x-[50%] translate-y-[-50%]">
+                {unreadStdMsg}
+              </div>
             </button>
           </>
         )}

@@ -9,6 +9,7 @@ import MyBooks from "../sections/MyBooks";
 import { motion } from "framer-motion";
 import BannerImg from "../assets/girlslib.jpg";
 import { io } from "socket.io-client";
+import { useSnackbar } from "notistack";
 const socketIo = io("http://localhost:3002");
 
 import "./home.css";
@@ -17,19 +18,27 @@ import userStore from "../store/UserStore";
 import axios from "axios";
 
 function Home() {
+  const { enqueueSnackbar } = useSnackbar();
   const [activeSection, setActiveSection] = useState("Home");
   const { getAllBookStore } = bookStore();
   const [sticky, setSticky] = useState(false);
   const {
     loggedStudent,
+    setLoggedStudent,
     setSocket,
     setStudent,
     onlineUsers,
     // setOnlineUsers,
+    user,
     socket,
+    conversation,
     setConversationStore,
     setMessageConversationStore,
   } = userStore();
+
+  const [openChat, setOpenChat] = useState(false);
+
+  console.log("open", openChat);
 
   useEffect(() => {
     const handleSticky = () => {
@@ -44,19 +53,40 @@ function Home() {
   }, []);
 
   useEffect(() => {
+    // const listenSocktMsg = async () => {
     if (socket) {
       console.log("logged std home", loggedStudent);
       socket.on("connected", (id: string) => {
         console.log("socket id", id, loggedStudent?._id);
       });
-      socket.on("getMessage", (msg: any) => {
+      socket.on("getMessage", async (msg: any) => {
         console.log("Message from socket", msg.message);
 
         if (msg) {
-          setMessageConversationStore(msg);
+          // console.log("my conv is", conversation);
+          if (openChat === true) {
+            console.log("msg true", conversation, openChat);
+            msg.message.read = true;
+            setMessageConversationStore({
+              ...msg,
+              message: { ...msg.message, read: true },
+            });
+            const conversationCall = await axios.get(
+              `http://localhost:3000/api/conversation/${user?._id}/${user?.name}/${user?._id}`
+            );
+            console.log("conversationcall", conversationCall.data);
+          } else {
+            // enqueueSnackbar("New notification", {
+            //   variant: "success",
+            //   anchorOrigin: { horizontal: "right", vertical: "bottom" },
+            // });
+            console.log("msg false", msg, conversation);
+            setMessageConversationStore(msg);
+          }
         }
       });
     }
+    // };
   }, [socket]);
 
   useEffect(() => {
@@ -81,8 +111,14 @@ function Home() {
           }
         );
 
+        console.log("getStudent", getNextOutlet.data);
+
+        // const conversationCall = await axios.get(
+        //   `http://localhost:3000/api/conversation/${getNextOutlet.data._id}/${getNextOutlet.data.name}/${getNextOutlet.data._id}`
+        // );
+
         const conversationCall = await axios.get(
-          `http://localhost:3000/api/conversation/${getNextOutlet.data._id}/${getNextOutlet.data.name}`
+          `http://localhost:3000/api/conversation/${getNextOutlet.data._id}`
         );
 
         console.log("conversationCall", conversationCall.data);
@@ -90,10 +126,17 @@ function Home() {
         setConversationStore({
           _id: conversationCall.data._id,
           ...conversationCall.data,
+          isOpen: false,
         });
 
         console.log("getStudent", getNextOutlet);
-        if (getNextOutlet) {
+        if (getNextOutlet.data._id) {
+          console.log("logged out socket", getNextOutlet.data);
+          setLoggedStudent({
+            _id: getNextOutlet.data._id,
+            name: getNextOutlet.data.name,
+            email: getNextOutlet.data._email,
+          });
           console.log("logged out socket", loggedStudent);
           setSocket(socketIo);
           socketIo.on("connected", (id: string) => {
@@ -153,14 +196,20 @@ function Home() {
     getBookCall();
   }, []);
 
-  console.log("Active section is:", activeSection, sticky);
+  // console.log("Active section is:", activeSection, sticky);
+  console.log("logged out socket", loggedStudent);
 
   return (
     <>
       <div
         className={`w-full z-50 top-0 ${sticky ? "sticky" : ""} bg-slate-900`}
       >
-        <Navbar activeSection={activeSection} sticky={sticky} />
+        <Navbar
+          setOpenChat={setOpenChat}
+          openChat={openChat}
+          activeSection={activeSection}
+          sticky={sticky}
+        />
       </div>
       <div className="">
         <section id="Home">

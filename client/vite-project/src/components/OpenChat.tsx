@@ -21,6 +21,7 @@ type Conversation = {
     };
     message: string;
     timestamp: string;
+    read: boolean;
   }[];
 };
 
@@ -44,7 +45,7 @@ function OpenChat() {
       const conversationsCall = await axios.get(
         "http://localhost:3000/api/conversation/"
       );
-      console.log(conversationsCall.data);
+      // console.log("AllConversations", conversationsCall.data);
 
       setConversations(conversationsCall.data);
       socket.emit("allConversations", conversationsCall.data);
@@ -53,19 +54,7 @@ function OpenChat() {
     getAllConversations();
   }, []);
 
-  // useEffect(() => {
-  //   if (user?.username && user._id) {
-  //     setMessageConversationStore({
-  //       message: {
-  //         sender: { senderId: user._id, user: user.username },
-  //         message: myMessage,
-  //         timestamp: new Date(),
-  //       },
-  //     });
-  //   }
-  // }, [conversation]);
-
-  console.log("All conversations", conversations);
+  // console.log("All conversations", conversations);
 
   const openChatConversation = (studentConversation: Student) => {
     console.log("Selected student", studentConversation);
@@ -96,16 +85,6 @@ function OpenChat() {
           new Date()
         );
 
-        // if (user?.username && user._id) {
-        //   setMessageConversationStore({
-        //     message: {
-        //       sender: { senderId: user._id, user: user.username },
-        //       message: myMessage,
-        //       timestamp: new Date(),
-        //     },
-        //   });
-        // }
-
         socket.emit("sentMessage", {
           ...conversation,
           receiverId: selectedStudent?._id,
@@ -115,6 +94,7 @@ function OpenChat() {
               sender: { senderId: admin._id, user: admin.username },
               message: myMessage,
               timestamp: new Date(),
+              read: false,
             },
           ],
         });
@@ -133,6 +113,41 @@ function OpenChat() {
 
   console.log("MyMessages", selectedStudent);
 
+  const conversationState = (student: Student) => {
+    const findConversation = conversations?.filter((conversation) =>
+      conversation.messages?.some(
+        (message) => message.sender.user_id !== admin?._id
+      )
+    );
+
+    console.log(
+      "Findconversation different userId",
+      // conversations,
+      findConversation
+    );
+
+    if (findConversation) {
+      const singleConversation = findConversation?.find(
+        (conversation) =>
+          student._id ===
+          conversation.members.find((member) => member.userId === student._id)
+            ?.userId
+      );
+
+      console.log("Included conversation", singleConversation);
+
+      if (singleConversation && singleConversation.messages) {
+        return singleConversation?.messages?.filter(
+          (message) => !message.read && message.sender.user_id !== admin?._id
+        ).length;
+      } else {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
+  };
+
   return (
     <motion.div
       initial="hidden"
@@ -144,12 +159,6 @@ function OpenChat() {
       }}
       className={`text-white z-[2] w-[50%]  fixed top-[25%] overflow-y-hidden right-2 h-[75%]  bg-slate-950 flex flex-col border-[1px] border-blue-400 rounded-xl  `}
     >
-      {/* <div className="w-full py-5 border-slate-600 border-b h-auto">
-        <h1 className="text-center text-xl text-blue-800 font-semibold ">
-          LIBRARIA CHATS
-        </h1>
-      </div> */}
-
       {/**CONTAINER */}
       <div className="flex w-full h-[100%]">
         {/**STUDENTS CONTAINER */}
@@ -176,7 +185,12 @@ function OpenChat() {
                 }}
                 className={`cursor-pointer transition-all duration-200 px-1 py-2 border-slate-700 border-b-[1px] hover:text-yellow-500 text-sm font-semibold text-slate-500`}
               >
-                {student.name}
+                {student.name}{" "}
+                {conversationState(student) > 0 && (
+                  <span className="text-white bg-green-600 rounded-2xl font-thin text-[0.65rem] py-[1px] px-2">
+                    {conversationState(student)} new messages
+                  </span>
+                )}
               </p>
             ))}
           </div>

@@ -1,8 +1,9 @@
 import SendIcon from "@mui/icons-material/Send";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Message from "./Message";
 import userStore from "../store/UserStore";
+import axios from "axios";
 // import axios from "axios";
 
 // type Student = {
@@ -17,6 +18,8 @@ function OpenChatStd() {
     submitMessageStore,
     // setConversationStore,
     conversation,
+    setConversationStore,
+
     socket,
   } = userStore();
 
@@ -66,6 +69,28 @@ function OpenChatStd() {
   };
 
   // console.log("MyMessages", selectedStudent);
+
+  useEffect(() => {
+    // if (conversation) setConversationStore({ ...conversation, isOpen: true });
+    const getConversation = async () => {
+      if (user?._id && user?.name) {
+        // console.log("conversationCall");
+        const conversationCall = await axios.get(
+          `http://localhost:3000/api/conversation/${user._id}/${user?.name}/${user?._id}`
+        );
+
+        console.log("conversationCall", conversationCall.data);
+        // setConversation(conversationCall.data);
+        setConversationStore({
+          _id: conversationCall.data._id,
+          ...conversationCall.data,
+          isOpen: true,
+        });
+      }
+    };
+
+    getConversation();
+  }, []);
 
   return (
     <motion.div

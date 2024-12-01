@@ -20,12 +20,17 @@ export class ConversationController {
     return this.conversationService.getAllConversationService();
   }
 
-  @Get(':studentId/:name')
+  @Get(':studentId/:name?/:userId?')
   getConversation(
     @Param('studentId') stdId: string,
-    @Param('name') stdname: string,
+    @Param('name') stdname?: string,
+    @Param('userId') userId?: string,
   ) {
-    return this.conversationService.getConversationService(stdId, stdname);
+    return this.conversationService.getConversationService(
+      stdId,
+      stdname,
+      userId,
+    );
   }
 
   @Patch(':conversationId')

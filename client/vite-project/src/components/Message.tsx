@@ -25,10 +25,10 @@ function Message({ student }: Props) {
 
   useEffect(() => {
     const getConversation = async () => {
-      console.log("getConversation");
+      console.log("getConversation", user);
       try {
         const conversationCall = await axios.get(
-          `http://localhost:3000/api/conversation/${student._id}/${student.name}`
+          `http://localhost:3000/api/conversation/${student._id}/${student.name}/${user?._id}`
         );
 
         console.log("conversationCall", conversationCall.data);

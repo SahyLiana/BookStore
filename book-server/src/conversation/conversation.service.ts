@@ -13,37 +13,88 @@ export class ConversationService {
     private conversationModel: Model<Conversation>,
   ) {}
 
-  async getConversationService(stdId, stdname) {
-    console.log('GetConversationService', stdId);
+  async getConversationService(
+    stdId: string,
+    stdname?: string,
+    userId?: string,
+  ) {
+    console.log('GetConversationService', stdId, userId);
 
     const isValid = mongoose.Types.ObjectId.isValid(stdId);
     if (!isValid) {
       throw new HttpException('Invalid id', HttpStatus.BAD_REQUEST);
     }
 
-    const findConversation = await this.conversationModel.findOne({
-      'members.userId': { $in: [stdId] },
-    });
+    // const findConversation = await this.conversationModel.findOneAndUpdate(
+    //   {
+    //     'members.userId': { $in: [stdId] },
+    //   },
+    //   { messages: { $set: { read: true } } },
+    //   { new: true },
+    // );
 
-    console.log(findConversation);
+    let findConversation = null;
 
-    if (!findConversation) {
-      const newConversation = new this.conversationModel({
-        members: [
-          {
-            name: 'admin',
-            userId: '6728ea82e3ac64c5a6f9f526',
-          },
-          {
-            name: stdname,
-            userId: stdId,
-          },
-        ],
+    if (stdname && userId) {
+      findConversation = await this.conversationModel.findOneAndUpdate(
+        {
+          'members.userId': { $in: [stdId] }, // Ensures the conversation includes the user with stdId
+        },
+        {
+          $set: { 'messages.$[elem].read': true }, // Update the read status of matching messages
+        },
+        {
+          arrayFilters: [
+            {
+              'elem.read': false, // Only update messages that have not been read yet
+              'elem.sender.user_id': { $ne: userId }, // Ensure the sender's user_id is different from userId
+            },
+          ],
+          new: true, // Return the updated conversation
+        },
+      );
+
+      console.log(findConversation);
+
+      if (!findConversation) {
+        const newConversation = new this.conversationModel({
+          members: [
+            {
+              name: 'admin',
+              userId: '6728ea82e3ac64c5a6f9f526',
+            },
+            {
+              name: stdname,
+              userId: stdId,
+            },
+          ],
+        });
+        return await newConversation.save();
+      }
+
+      return findConversation;
+    } else {
+      findConversation = await this.conversationModel.findOne({
+        'members.userId': { $in: [stdId] },
       });
-      return await newConversation.save();
-    }
 
-    return findConversation;
+      if (!findConversation) {
+        const newConversation = new this.conversationModel({
+          members: [
+            {
+              name: 'admin',
+              userId: '6728ea82e3ac64c5a6f9f526',
+            },
+            {
+              name: stdname,
+              userId: stdId,
+            },
+          ],
+        });
+        return await newConversation.save();
+      }
+      return findConversation;
+    }
   }
 
   async postMessageService(
@@ -80,6 +131,7 @@ export class ConversationService {
             sender: { user_id: message.senderId, user: message.senderName },
             message: message.message,
             timestamp: message.timestamp,
+            read: false,
           },
         },
       },

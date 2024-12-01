@@ -41,7 +41,9 @@ type Conversation = {
     };
     message: string;
     timestamp: Date;
+    read: boolean;
   }[];
+  isOpen?: boolean;
 };
 
 type MessageType = {
@@ -52,6 +54,7 @@ type MessageType = {
     };
     message: string;
     timestamp: Date;
+    read: boolean;
   };
 };
 
@@ -60,8 +63,10 @@ type State = {
   students: Omit<Student, "password">[];
   onlineUsers: OnlineUsers[] | [];
   user: User | null;
+  unreadStdMsg: number;
   loggedStudent: Omit<Student, "password"> | null;
   conversation: Conversation | null;
+  conversations: Conversation[] | [];
   socket: SocketType | null;
 };
 
@@ -73,6 +78,8 @@ type Actions = {
   ) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setSocket: (socket: any) => void;
+  setUnreadStdMsg: (unread: number) => void;
+  setLoggedStudent: (student: Omit<Student, "password">) => void;
   getAllStudents: (token: string | null) => void;
   deleteStudentStore: (user: string, token: string | null) => void;
   // registerStudentStore: (studentData: Omit<Student, "_id">) => void;
@@ -80,11 +87,12 @@ type Actions = {
     student: Omit<Student, "_id" | "name">
   ) => Promise<{ tokenstd: string; _id: string; name: string }>;
   logoutStudent: () => void;
+
   setStudent: (student: Omit<Student, "password">) => void;
   getAdminDashboard: (token: string | null) => void;
   setMessageConversationStore: (msg: MessageType) => void;
 
-  setConversationStore: (conversation: Conversation) => void;
+  setConversationStore: (conversation: Conversation | null) => void;
   submitMessageStore: (
     // stdId: string,
     conversation: Conversation,
@@ -102,8 +110,16 @@ const userStore = create<Actions & State>((set) => ({
   socket: null,
   user: null,
   conversation: null,
+  conversations: [],
   students: [],
   loggedStudent: null,
+  unreadStdMsg: 0,
+  setUnreadStdMsg: (unread: number) => {
+    set((state) => ({
+      ...state,
+      unreadStdMsg: unread,
+    }));
+  },
   setOnlineUsers(onlines) {
     set((state) => ({
       ...state,
@@ -118,12 +134,21 @@ const userStore = create<Actions & State>((set) => ({
     }));
   },
 
-  setConversationStore(conversation: Conversation) {
-    console.log("setConversationStore", conversation);
+  setLoggedStudent(student: Omit<Student, "password">) {
     set((state) => ({
       ...state,
-      conversation: { ...state.conversation, ...conversation },
+      loggedStudent: { ...student },
     }));
+  },
+
+  setConversationStore(conversation: Conversation | null) {
+    console.log("setConversationStore", conversation);
+    if (conversation) {
+      set((state) => ({
+        ...state,
+        conversation: { ...state.conversation, ...conversation },
+      }));
+    }
   },
 
   setMessageConversationStore(msg: MessageType) {
@@ -245,20 +270,22 @@ const userStore = create<Actions & State>((set) => ({
     console.log("All Students", getAllStudentCall.data);
     const getBookCall = await axios.get("http://localhost:3000/api/book");
 
-    // set((state) => ({
-    //   ...state,
-    //   books: [...getBookCall.data],
-    // }));
-
     console.log("GetBookCall", getBookCall.data);
     // const { getAllBookStore } = bookStore.getState();
     const { setBooks } = bookStore.getState();
 
     setBooks(getBookCall.data);
 
+    // const getAllConversationCall = await axios.get(
+    //   "http://localhost:3000/api/conversation/"
+    // );
+
+    // console.log("getAllConversationCall", getAllConversationCall.data);
+
     set((state) => ({
       ...state,
       students: [...getAllStudentCall.data],
+      // conversations: [...getAllConversationCall.data],
     }));
   },
 

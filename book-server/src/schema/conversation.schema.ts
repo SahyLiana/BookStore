@@ -13,6 +13,7 @@ export class Conversation {
     };
     message: string;
     timestamp: Date;
+    read: { type: Boolean; default: false };
   }[];
 }
 
