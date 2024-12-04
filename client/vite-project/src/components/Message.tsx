@@ -17,6 +17,9 @@ function Message({ student }: Props) {
     user,
     setConversationStore,
     conversation,
+    setConversations,
+    conversations,
+    setUnreadMessage,
     // setMessageConversationStore,
     // socket,
   } = userStore();
@@ -37,6 +40,33 @@ function Message({ student }: Props) {
           _id: conversationCall.data._id,
           ...conversationCall.data,
         });
+        setConversations(
+          conversations.map((conv) =>
+            conv._id === conversationCall.data._id
+              ? { _id: conversationCall.data._id, ...conversationCall.data }
+              : conv
+          )
+        );
+
+        const newConversations = conversations.map((conv) =>
+          conv._id === conversationCall.data._id
+            ? { _id: conversationCall.data._id, ...conversationCall.data }
+            : conv
+        );
+
+        if (
+          newConversations.some((conv) =>
+            conv.messages?.some(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (msg: any) =>
+                msg.read === false && msg.sender.user_id !== user?._id
+            )
+          )
+        ) {
+          setUnreadMessage(true);
+        } else {
+          setUnreadMessage(false);
+        }
       } catch (e) {
         console.log(e);
       }

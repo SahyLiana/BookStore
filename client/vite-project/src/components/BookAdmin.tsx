@@ -21,13 +21,6 @@ type Props = {
   };
 };
 
-// type BookType = {
-//   title: string;
-//   img: string;
-//   featured: boolean;
-//   likedBy?: string[];
-// };
-
 type BookType = {
   _id: string;
   title: string;

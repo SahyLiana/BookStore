@@ -54,40 +54,44 @@ function Home() {
 
   useEffect(() => {
     // const listenSocktMsg = async () => {
+    console.log("Open effect", openChat);
     if (socket) {
       console.log("logged std home", loggedStudent);
       socket.on("connected", (id: string) => {
         console.log("socket id", id, loggedStudent?._id);
       });
       socket.on("getMessage", async (msg: any) => {
-        console.log("Message from socket", msg.message);
+        console.log("Message from socket", msg.message, openChat);
 
         if (msg) {
-          // console.log("my conv is", conversation);
-          if (openChat === true) {
+          console.log("my conv is", conversation, openChat);
+          if (openChat) {
             console.log("msg true", conversation, openChat);
             msg.message.read = true;
-            setMessageConversationStore({
-              ...msg,
-              message: { ...msg.message, read: true },
-            });
+            setMessageConversationStore({ ...msg, read: true });
             const conversationCall = await axios.get(
               `http://localhost:3000/api/conversation/${user?._id}/${user?.name}/${user?._id}`
             );
             console.log("conversationcall", conversationCall.data);
           } else {
-            // enqueueSnackbar("New notification", {
-            //   variant: "success",
-            //   anchorOrigin: { horizontal: "right", vertical: "bottom" },
-            // });
+            enqueueSnackbar("New message", {
+              variant: "success",
+              anchorOrigin: { horizontal: "right", vertical: "bottom" },
+            });
             console.log("msg false", msg, conversation);
-            setMessageConversationStore(msg);
+            setMessageConversationStore({ ...msg, read: false });
           }
         }
       });
     }
+    // Cleanup function to remove the listener when the effect is cleaned up
+    return () => {
+      if (socket) {
+        socket.off("getMessage");
+      }
+    };
     // };
-  }, [socket]);
+  }, [socket, openChat]);
 
   useEffect(() => {
     if (socket) {
@@ -96,6 +100,12 @@ function Home() {
         console.log("connected socket users", users);
       });
     }
+
+    return () => {
+      if (socket) {
+        socket.off("users");
+      }
+    };
   }, [onlineUsers]);
 
   useEffect(() => {

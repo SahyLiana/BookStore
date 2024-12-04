@@ -7,16 +7,6 @@ import userStore from "../store/UserStore";
 import Chart from "react-apexcharts";
 import { useSnackbar } from "notistack";
 import { Skeleton } from "@mui/material";
-// import axios from "axios";
-// type BookType = {
-//   _id: string;
-//   title: string;
-//   img: string;
-//   featured: boolean;
-//   likedBy?: string[];
-//   borrowedBy: { user: string; name?: string; returnedBy?: string }[];
-//   quantity: number;
-// };
 
 function HomeDashboard() {
   const [loading, setLoading] = useState(true);

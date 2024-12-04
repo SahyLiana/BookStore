@@ -6,10 +6,11 @@ import { motion } from "framer-motion";
 // import "./bookFiles.css";
 
 type BooksType = {
+  _id: string;
   title: string;
   img: string;
   featured: boolean;
-  borrowedBy?: { by: string; returnedBy?: string }[];
+  borrowedBy?: { user: string; name?: string; returnedBy?: string }[];
   quantity: number;
 };
 

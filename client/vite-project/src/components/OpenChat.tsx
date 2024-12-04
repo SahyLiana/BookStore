@@ -1,28 +1,13 @@
 import SendIcon from "@mui/icons-material/Send";
 import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Message from "./Message";
 import userStore from "../store/UserStore";
-import axios from "axios";
 
 type Student = {
   _id: string;
   name: string;
   email: string;
-};
-
-type Conversation = {
-  _id: string;
-  members: { name: string; userId: string }[];
-  messages?: {
-    sender: {
-      user_id: string;
-      user: string;
-    };
-    message: string;
-    timestamp: string;
-    read: boolean;
-  }[];
 };
 
 function OpenChat() {
@@ -33,28 +18,17 @@ function OpenChat() {
     submitMessageStore,
     conversation,
     socket,
+    // setUnreadMessage,
+    // setConversations,
+    conversations,
     // user,
   } = userStore();
 
-  const [conversations, setConversations] = useState<Conversation[] | []>();
+  // const [conversations, setConversations] = useState<Conversation[] | []>();
 
   const [selectedStudent, setSelectedStudent] = useState<Student | null>();
 
-  useEffect(() => {
-    async function getAllConversations() {
-      const conversationsCall = await axios.get(
-        "http://localhost:3000/api/conversation/"
-      );
-      // console.log("AllConversations", conversationsCall.data);
-
-      setConversations(conversationsCall.data);
-      socket.emit("allConversations", conversationsCall.data);
-    }
-
-    getAllConversations();
-  }, []);
-
-  // console.log("All conversations", conversations);
+  console.log("All conversations", conversations);
 
   const openChatConversation = (studentConversation: Student) => {
     console.log("Selected student", studentConversation);
@@ -122,7 +96,7 @@ function OpenChat() {
 
     console.log(
       "Findconversation different userId",
-      // conversations,
+      conversations,
       findConversation
     );
 

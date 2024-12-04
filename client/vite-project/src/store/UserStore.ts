@@ -68,6 +68,7 @@ type State = {
   conversation: Conversation | null;
   conversations: Conversation[] | [];
   socket: SocketType | null;
+  unreadMessage: boolean;
 };
 
 type Actions = {
@@ -76,6 +77,8 @@ type Actions = {
     studentData: Omit<Student, "_id" | "password"> | Omit<Student, "password">,
     token?: string | null
   ) => void;
+  setUnreadMessage: (bool: boolean) => void;
+  setConversations: (conversations: Conversation[]) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setSocket: (socket: any) => void;
   setUnreadStdMsg: (unread: number) => void;
@@ -114,10 +117,23 @@ const userStore = create<Actions & State>((set) => ({
   students: [],
   loggedStudent: null,
   unreadStdMsg: 0,
+  unreadMessage: false,
+  setUnreadMessage: (bool) => {
+    set((state) => ({
+      ...state,
+      unreadMessage: bool,
+    }));
+  },
   setUnreadStdMsg: (unread: number) => {
     set((state) => ({
       ...state,
       unreadStdMsg: unread,
+    }));
+  },
+  setConversations: (conversations: Conversation[]) => {
+    set((state) => ({
+      ...state,
+      conversations: [...conversations],
     }));
   },
   setOnlineUsers(onlines) {
@@ -147,6 +163,11 @@ const userStore = create<Actions & State>((set) => ({
       set((state) => ({
         ...state,
         conversation: { ...state.conversation, ...conversation },
+      }));
+    } else {
+      set((state) => ({
+        ...state,
+        conversation: null,
       }));
     }
   },

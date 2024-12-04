@@ -1,9 +1,6 @@
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
-// import { Link } from "react-router-dom";
-// import Modal from "react-modal";
 import Modal from "react-modal";
 import { motion } from "framer-motion";
-// import { io } from "socket.io-client";
 import React, { useEffect, useRef, useState } from "react";
 import userStore from "../store/UserStore";
 import { useSnackbar } from "notistack";
@@ -352,9 +349,9 @@ function Navbar({ activeSection, setOpenChat, openChat }: Props) {
             >
               {openChat ? "Close Chats" : "My Chats"}{" "}
               <ChatIcon style={{ fontSize: "1rem" }} />
-              <div className="absolute top-0 right-0 bg-white rounded-full text-[0.6rem] text-green-500 py-1 px-2 font-bold translate-x-[50%] translate-y-[-50%]">
+              <span className="absolute top-0 right-0 bg-white rounded-full text-[0.6rem] text-green-500 py-1 px-2 font-bold translate-x-[50%] translate-y-[-50%]">
                 {unreadStdMsg}
-              </div>
+              </span>
             </button>
           </>
         )}
